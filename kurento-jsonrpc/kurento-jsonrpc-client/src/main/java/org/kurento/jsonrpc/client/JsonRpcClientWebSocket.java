@@ -221,7 +221,7 @@ public class JsonRpcClientWebSocket extends JsonRpcClient {
 				}
 
 				this.closeClient();
-				throw new KurentoException(label + " Timeout of "
+				throw new IOException(label + " Timeout of "
 						+ this.connectionTimeout
 						+ "ms when waiting to connect to Websocket server "
 						+ url);
@@ -232,7 +232,7 @@ public class JsonRpcClientWebSocket extends JsonRpcClient {
 				}
 
 				this.closeClient();
-				throw new KurentoException(label
+				throw new IOException(label
 						+ " Exception connecting to WebSocket server " + url, e);
 			}
 
@@ -243,7 +243,7 @@ public class JsonRpcClientWebSocket extends JsonRpcClient {
 						connectionListener.connectionFailed();
 					}
 					this.closeClient();
-					throw new KurentoException(label + " Timeout of "
+					throw new IOException(label + " Timeout of "
 							+ this.connectionTimeout
 							+ "ms when waiting to connect to Websocket server "
 							+ url);

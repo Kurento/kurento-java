@@ -63,7 +63,7 @@ public class KurentoClient {
 		try {
 			client.connect();
 		} catch (IOException e) {
-			throw new KurentoException("Exception connecting to KMS", e);
+		    log.warn("Exception connecting to KMS: {}", e.toString());
 		}
 	}
 
