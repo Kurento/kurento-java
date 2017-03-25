@@ -455,7 +455,7 @@ public class ParamsFlattener {
     int counter = 0;
     if (value != null) {
       for (Object object : value) {
-        list.add(unflattenValue(paramName + "[" + counter + "]", type, object, manager));
+        list.add(unflattenValue(paramName + "[" + counter + "]", object.getClass(), object, manager));
         counter++;
       }
     }
