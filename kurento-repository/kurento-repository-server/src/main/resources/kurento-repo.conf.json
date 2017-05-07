@@ -4,7 +4,7 @@
     "hostname": "127.0.0.1",
     
     //mongodb or filesystem
-    "type": "mongodb",
+    "type": "filesystem",
     
     "mongodb": {
       "dbName": "kurento",
@@ -12,7 +12,7 @@
       "urlConn": "mongodb://localhost"
     },
     "filesystem": {
-      "folder": "/tmp/repository"
+      "folder": "repository"
     }
   }
 }
