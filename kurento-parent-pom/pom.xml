@@ -2,13 +2,14 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<parent>
+	<!-- parent>
 		<groupId>org.kurento</groupId>
 		<artifactId>kurento-qa-pom</artifactId>
 		<version>1.0.4-SNAPSHOT</version>
-		<relativePath /> <!-- lookup parent from repository -->
-	</parent>
+		<relativePath /> <! lookup parent from repository >
+	</parent -->
 
+	<groupId>org.kurento</groupId>
 	<artifactId>kurento-parent-pom</artifactId>
 	<version>6.6.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
