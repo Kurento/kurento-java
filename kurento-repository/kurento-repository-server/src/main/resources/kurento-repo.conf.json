@@ -12,7 +12,7 @@
       "urlConn": "mongodb://localhost"
     },
     "filesystem": {
-      "folder": "repository"
+      "folder": "../../kurento-repository"
     }
   }
 }
