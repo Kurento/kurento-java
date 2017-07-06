@@ -251,7 +251,7 @@ public class JsonRpcClientNettyWebSocket extends AbstractJsonRpcClientWebSocket 
       while (channel == null || !channel.isOpen()) {
         try {
           channel = b.connect(host, port).sync().channel();
-          handler.handshakeFuture().sync();
+          if (!handler.handshakeFuture().await(this.connectionTimeout)) throw new WebSocketHandshakeException("Timeout");
         } catch (InterruptedException e) {
           // This should never happen
           log.warn("{} ERROR connecting WS Netty client, opening channel", label, e);
