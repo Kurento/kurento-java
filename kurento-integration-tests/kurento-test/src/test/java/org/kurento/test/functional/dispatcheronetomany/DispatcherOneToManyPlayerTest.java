@@ -27,8 +27,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
 import org.kurento.client.DispatcherOneToMany;
-import org.kurento.client.EndOfStreamEvent;
-import org.kurento.client.EventListener;
 import org.kurento.client.HubPort;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.PlayerEndpoint;
@@ -111,12 +109,7 @@ public class DispatcherOneToManyPlayerTest extends FunctionalTest {
     dispatcherOneToMany.setSource(hubPort1);
 
     final CountDownLatch eosLatch = new CountDownLatch(1);
-    playerEp2.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
-      @Override
-      public void onEvent(EndOfStreamEvent event) {
-        eosLatch.countDown();
-      }
-    });
+    playerEp2.addEndOfStreamListener(event -> eosLatch.countDown());
 
     // Test execution
     getPage(BROWSER1).subscribeEvents("playing");

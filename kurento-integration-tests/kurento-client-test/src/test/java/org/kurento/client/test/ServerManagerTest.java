@@ -30,7 +30,6 @@ import java.util.concurrent.TimeoutException;
 
 import org.hamcrest.core.IsSame;
 import org.junit.Test;
-import org.kurento.client.EventListener;
 import org.kurento.client.KurentoClient;
 import org.kurento.client.MediaObject;
 import org.kurento.client.MediaPipeline;
@@ -57,16 +56,13 @@ public class ServerManagerTest extends KurentoClientTest {
 
     final Exchanger<MediaObject> exchanger = new Exchanger<>();
 
-    server.addObjectCreatedListener(new EventListener<ObjectCreatedEvent>() {
-      @Override
-      public void onEvent(ObjectCreatedEvent event) {
+    server.addObjectCreatedListener(event -> {
         try {
           exchanger.exchange(event.getObject());
         } catch (InterruptedException e) {
           e.printStackTrace();
         }
-      }
-    });
+      });
 
     MediaPipeline pipeline = kurentoClient.createMediaPipeline();
 

@@ -27,15 +27,9 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.runners.Parameterized.Parameters;
-import org.kurento.client.ElementConnectedEvent;
-import org.kurento.client.ElementDisconnectedEvent;
-import org.kurento.client.EventListener;
 import org.kurento.client.ListenerSubscription;
-import org.kurento.client.MediaFlowOutStateChangeEvent;
 import org.kurento.client.MediaFlowState;
 import org.kurento.client.MediaPipeline;
-import org.kurento.client.ObjectCreatedEvent;
-import org.kurento.client.ObjectDestroyedEvent;
 import org.kurento.client.PassThrough;
 import org.kurento.client.WebRtcEndpoint;
 import org.kurento.test.browser.WebRtcChannel;
@@ -163,22 +157,10 @@ public class PipelineStabilityConnectDisconnectWebRtcAndPassthroughOneToManyPara
     initMemory();
 
     ListenerSubscription listenerObjectCreated =
-        getServerManager().addObjectCreatedListener(new EventListener<ObjectCreatedEvent>() {
-
-          @Override
-          public void onEvent(ObjectCreatedEvent event) {
-            objectsLatch.getObjectsCreatedLatch().countDown();
-          }
-        });
+        getServerManager().addObjectCreatedListener(event -> objectsLatch.getObjectsCreatedLatch().countDown());
 
     ListenerSubscription listenerObjectDestroyed =
-        getServerManager().addObjectDestroyedListener(new EventListener<ObjectDestroyedEvent>() {
-
-          @Override
-          public void onEvent(ObjectDestroyedEvent event) {
-            objectsLatch.getObjectsDestroyedLatch().countDown();
-          }
-        });
+        getServerManager().addObjectDestroyedListener(event -> objectsLatch.getObjectsDestroyedLatch().countDown());
 
     int passthroughToCreate = 0;
     int objectsToCreate = 0;
@@ -216,28 +198,15 @@ public class PipelineStabilityConnectDisconnectWebRtcAndPassthroughOneToManyPara
 
         final CountDownLatch flowingLatch = new CountDownLatch(1);
         webRtcRoot
-            .addMediaFlowOutStateChangeListener(new EventListener<MediaFlowOutStateChangeEvent>() {
-
-              @Override
-              public void onEvent(MediaFlowOutStateChangeEvent event) {
+            .addMediaFlowOutStateChangeListener(event -> {
                 if (event.getState().equals(MediaFlowState.FLOWING)) {
                   flowingLatch.countDown();
                 }
-              }
-            });
+              });
 
-        webRtcRoot.addElementConnectedListener(new EventListener<ElementConnectedEvent>() {
+        webRtcRoot.addElementConnectedListener(event -> connectionStateLatch.getStateConnectedLatch().countDown());
 
-          @Override
-          public void onEvent(ElementConnectedEvent event) {
-            connectionStateLatch.getStateConnectedLatch().countDown();
-          }
-        });
-
-        Thread th2 = new Thread(new Runnable() {
-
-          @Override
-          public void run() {
+        Thread th2 = new Thread(() -> {
             try {
               getPage(browser).initWebRtc(webRtcRoot, WebRtcChannel.AUDIO_AND_VIDEO,
                   WebRtcMode.SEND_RCV);
@@ -245,8 +214,7 @@ public class PipelineStabilityConnectDisconnectWebRtcAndPassthroughOneToManyPara
             } catch (InterruptedException e) {
               e.printStackTrace();
             }
-          }
-        });
+          });
         th2.start();
 
         for (int k = 0; k < passthroughToCreate; k++) {
@@ -279,13 +247,7 @@ public class PipelineStabilityConnectDisconnectWebRtcAndPassthroughOneToManyPara
       // Disconnect
       for (Entry<WebRtcEndpoint, ArrayList<PassThrough>> element : webRtcRootChildren.entrySet()) {
         WebRtcEndpoint webRtcRoot = element.getKey();
-        webRtcRoot.addElementDisconnectedListener(new EventListener<ElementDisconnectedEvent>() {
-
-          @Override
-          public void onEvent(ElementDisconnectedEvent event) {
-            connectionStateLatch.getStateDisconnectedLatch().countDown();
-          }
-        });
+        webRtcRoot.addElementDisconnectedListener(event -> connectionStateLatch.getStateDisconnectedLatch().countDown());
         for (PassThrough passThrough : element.getValue()) {
           webRtcRoot.disconnect(passThrough);
         }

@@ -24,9 +24,6 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
 import org.junit.experimental.categories.Category;
-import org.kurento.client.EndOfStreamEvent;
-import org.kurento.client.EventListener;
-import org.kurento.client.MediaFlowInStateChangeEvent;
 import org.kurento.client.MediaFlowState;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.PlayerEndpoint;
@@ -72,23 +69,16 @@ public class StabilityTest extends RepositoryMongoTest {
     final CountDownLatch eosLatch = new CountDownLatch(1);
     final CountDownLatch flowingLatch = new CountDownLatch(1);
 
-    playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
-      @Override
-      public void onEvent(EndOfStreamEvent event) {
+    playerEp.addEndOfStreamListener(event -> {
         log.debug("Received EndOfStream Event");
         eosLatch.countDown();
-      }
-    });
+      });
 
-    webRtcEp.addMediaFlowInStateChangeListener(new EventListener<MediaFlowInStateChangeEvent>() {
-
-      @Override
-      public void onEvent(MediaFlowInStateChangeEvent event) {
+    webRtcEp.addMediaFlowInStateChangeListener(event -> {
         if (event.getState().equals(MediaFlowState.FLOWING)) {
           flowingLatch.countDown();
         }
-      }
-    });
+      });
 
     // Test execution
     getPage().subscribeEvents("playing");

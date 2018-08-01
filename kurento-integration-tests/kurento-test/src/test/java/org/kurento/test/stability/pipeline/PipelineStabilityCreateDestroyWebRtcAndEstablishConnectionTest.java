@@ -26,13 +26,10 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.kurento.client.EventListener;
-import org.kurento.client.IceCandidateFoundEvent;
 import org.kurento.client.IceComponentState;
 import org.kurento.client.IceComponentStateChangeEvent;
 import org.kurento.client.ListenerSubscription;
 import org.kurento.client.MediaPipeline;
-import org.kurento.client.ObjectCreatedEvent;
-import org.kurento.client.ObjectDestroyedEvent;
 import org.kurento.client.WebRtcEndpoint;
 
 /**
@@ -132,22 +129,10 @@ public class PipelineStabilityCreateDestroyWebRtcAndEstablishConnectionTest exte
     initMemory();
 
     ListenerSubscription listenerObjectCreated =
-        getServerManager().addObjectCreatedListener(new EventListener<ObjectCreatedEvent>() {
-
-          @Override
-          public void onEvent(ObjectCreatedEvent event) {
-            objectsLatch.getObjectsCreatedLatch().countDown();
-          }
-        });
+        getServerManager().addObjectCreatedListener(event -> objectsLatch.getObjectsCreatedLatch().countDown());
 
     ListenerSubscription listenerObjectDestroyed =
-        getServerManager().addObjectDestroyedListener(new EventListener<ObjectDestroyedEvent>() {
-
-          @Override
-          public void onEvent(ObjectDestroyedEvent event) {
-            objectsLatch.getObjectsDestroyedLatch().countDown();
-          }
-        });
+        getServerManager().addObjectDestroyedListener(event -> objectsLatch.getObjectsDestroyedLatch().countDown());
 
     int webRtcEndpointToCreate = 0;
     int objectsToCreate = 0;
@@ -200,21 +185,9 @@ public class PipelineStabilityCreateDestroyWebRtcAndEstablishConnectionTest exte
           final WebRtcEndpoint webRtcEp1 = webRtcEndpoints.get(k);
           final WebRtcEndpoint webRtcEp2 = webRtcEndpoints.get(k + 1);
 
-          webRtcEp1.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
+          webRtcEp1.addIceCandidateFoundListener(event -> webRtcEp2.addIceCandidate(event.getCandidate()));
 
-            @Override
-            public void onEvent(IceCandidateFoundEvent event) {
-              webRtcEp2.addIceCandidate(event.getCandidate());
-            }
-          });
-
-          webRtcEp2.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
-
-            @Override
-            public void onEvent(IceCandidateFoundEvent event) {
-              webRtcEp1.addIceCandidate(event.getCandidate());
-            }
-          });
+          webRtcEp2.addIceCandidateFoundListener(event -> webRtcEp1.addIceCandidate(event.getCandidate()));
 
           webRtcEp1.connect(webRtcEp2);
           webRtcEp2.connect(webRtcEp1);

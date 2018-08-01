@@ -26,9 +26,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
-import org.kurento.client.CodeFoundEvent;
-import org.kurento.client.EndOfStreamEvent;
-import org.kurento.client.EventListener;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.PlayerEndpoint;
 import org.kurento.client.WebRtcEndpoint;
@@ -90,12 +87,7 @@ public class PlayerZBarTest extends FunctionalTest {
     zbarFilter.connect(webRtcEp);
 
     final CountDownLatch eosLatch = new CountDownLatch(1);
-    playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
-      @Override
-      public void onEvent(EndOfStreamEvent event) {
-        eosLatch.countDown();
-      }
-    });
+    playerEp.addEndOfStreamListener(event -> eosLatch.countDown());
 
     // Test execution
     getPage().subscribeEvents("playing");
@@ -103,17 +95,14 @@ public class PlayerZBarTest extends FunctionalTest {
     playerEp.play();
 
     final List<String> codeFoundEvents = new ArrayList<>();
-    zbarFilter.addCodeFoundListener(new EventListener<CodeFoundEvent>() {
-      @Override
-      public void onEvent(CodeFoundEvent event) {
+    zbarFilter.addCodeFoundListener(event -> {
         String codeFound = event.getValue();
 
         if (!codeFoundEvents.contains(codeFound)) {
           codeFoundEvents.add(codeFound);
           getPage().consoleLog(ConsoleLogLevel.INFO, "Code found: " + codeFound);
         }
-      }
-    });
+      });
 
     // Assertions
     Assert.assertTrue("Not received media (timeout waiting playing event)",

@@ -26,8 +26,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
 import org.kurento.client.Continuation;
-import org.kurento.client.EndOfStreamEvent;
-import org.kurento.client.EventListener;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.PlayerEndpoint;
 import org.kurento.client.RecorderEndpoint;
@@ -101,12 +99,7 @@ public class RepositoryRecorderTest extends RepositoryFunctionalTest {
     playerEp.connect(recorderEp);
 
     final CountDownLatch eosLatch = new CountDownLatch(1);
-    playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
-      @Override
-      public void onEvent(EndOfStreamEvent event) {
-        eosLatch.countDown();
-      }
-    });
+    playerEp.addEndOfStreamListener(event -> eosLatch.countDown());
 
     // Test execution #1. Play the video while it is recorded
     launchBrowser(webRtcEp1, playerEp, recorderEp);
@@ -143,12 +136,7 @@ public class RepositoryRecorderTest extends RepositoryFunctionalTest {
     getPage().initWebRtc(webRtcEp, WebRtcChannel.AUDIO_AND_VIDEO, WebRtcMode.RCV_ONLY);
     playerEp.play();
     final CountDownLatch eosLatch = new CountDownLatch(1);
-    playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
-      @Override
-      public void onEvent(EndOfStreamEvent event) {
-        eosLatch.countDown();
-      }
-    });
+    playerEp.addEndOfStreamListener(event -> eosLatch.countDown());
 
     if (recorderEp != null) {
       recorderEp.record();

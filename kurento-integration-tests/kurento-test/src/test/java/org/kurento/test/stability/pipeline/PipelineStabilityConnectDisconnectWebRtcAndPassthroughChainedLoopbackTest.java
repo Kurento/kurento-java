@@ -27,16 +27,9 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.runners.Parameterized.Parameters;
-import org.kurento.client.ElementConnectedEvent;
-import org.kurento.client.ElementDisconnectedEvent;
-import org.kurento.client.EventListener;
 import org.kurento.client.ListenerSubscription;
-import org.kurento.client.MediaFlowInStateChangeEvent;
-import org.kurento.client.MediaFlowOutStateChangeEvent;
 import org.kurento.client.MediaFlowState;
 import org.kurento.client.MediaPipeline;
-import org.kurento.client.ObjectCreatedEvent;
-import org.kurento.client.ObjectDestroyedEvent;
 import org.kurento.client.PassThrough;
 import org.kurento.client.WebRtcEndpoint;
 import org.kurento.test.browser.WebRtcChannel;
@@ -160,22 +153,10 @@ public class PipelineStabilityConnectDisconnectWebRtcAndPassthroughChainedLoopba
     initMemory();
 
     ListenerSubscription listenerObjectCreated =
-        getServerManager().addObjectCreatedListener(new EventListener<ObjectCreatedEvent>() {
-
-          @Override
-          public void onEvent(ObjectCreatedEvent event) {
-            objectsLatch.getObjectsCreatedLatch().countDown();
-          }
-        });
+        getServerManager().addObjectCreatedListener(event -> objectsLatch.getObjectsCreatedLatch().countDown());
 
     ListenerSubscription listenerObjectDestroyed =
-        getServerManager().addObjectDestroyedListener(new EventListener<ObjectDestroyedEvent>() {
-
-          @Override
-          public void onEvent(ObjectDestroyedEvent event) {
-            objectsLatch.getObjectsDestroyedLatch().countDown();
-          }
-        });
+        getServerManager().addObjectDestroyedListener(event -> objectsLatch.getObjectsDestroyedLatch().countDown());
 
     int passthroughToCreate = 0;
     int objectsToCreate = 0;
@@ -218,43 +199,23 @@ public class PipelineStabilityConnectDisconnectWebRtcAndPassthroughChainedLoopba
 
         final CountDownLatch flowingOutLatch = new CountDownLatch(1);
         webRtcRoot
-            .addMediaFlowOutStateChangeListener(new EventListener<MediaFlowOutStateChangeEvent>() {
-
-              @Override
-              public void onEvent(MediaFlowOutStateChangeEvent event) {
+            .addMediaFlowOutStateChangeListener(event -> {
                 if (event.getState().equals(MediaFlowState.FLOWING)) {
                   flowingOutLatch.countDown();
                 }
-              }
-            });
+              });
 
         final CountDownLatch flowingInLatch = new CountDownLatch(1);
         webRtcRoot
-            .addMediaFlowInStateChangeListener(new EventListener<MediaFlowInStateChangeEvent>() {
-
-              @Override
-              public void onEvent(MediaFlowInStateChangeEvent event) {
+            .addMediaFlowInStateChangeListener(event -> {
                 if (event.getState().equals(MediaFlowState.FLOWING)) {
                   flowingInLatch.countDown();
                 }
-              }
-            });
+              });
 
-        webRtcRoot.addElementConnectedListener(new EventListener<ElementConnectedEvent>() {
+        webRtcRoot.addElementConnectedListener(event -> connectionStateLatch.getStateConnectedLatch().countDown());
 
-          @Override
-          public void onEvent(ElementConnectedEvent event) {
-            connectionStateLatch.getStateConnectedLatch().countDown();
-          }
-        });
-
-        webRtcRoot.addElementDisconnectedListener(new EventListener<ElementDisconnectedEvent>() {
-
-          @Override
-          public void onEvent(ElementDisconnectedEvent event) {
-            connectionStateLatch.getStateDisconnectedLatch().countDown();
-          }
-        });
+        webRtcRoot.addElementDisconnectedListener(event -> connectionStateLatch.getStateDisconnectedLatch().countDown());
 
         getPage(j).initWebRtc(webRtcRoot, WebRtcChannel.AUDIO_AND_VIDEO, WebRtcMode.SEND_RCV);
 
@@ -264,20 +225,8 @@ public class PipelineStabilityConnectDisconnectWebRtcAndPassthroughChainedLoopba
         // Create passthroughs
         for (int k = 0; k < passthroughToCreate; k++) {
           PassThrough passThrough = new PassThrough.Builder(mp).build();
-          passThrough.addElementConnectedListener(new EventListener<ElementConnectedEvent>() {
-
-            @Override
-            public void onEvent(ElementConnectedEvent event) {
-              connectionStateLatch.getStateConnectedLatch().countDown();
-            }
-          });
-          passThrough.addElementDisconnectedListener(new EventListener<ElementDisconnectedEvent>() {
-
-            @Override
-            public void onEvent(ElementDisconnectedEvent event) {
-              connectionStateLatch.getStateDisconnectedLatch().countDown();
-            }
-          });
+          passThrough.addElementConnectedListener(event -> connectionStateLatch.getStateConnectedLatch().countDown());
+          passThrough.addElementDisconnectedListener(event -> connectionStateLatch.getStateDisconnectedLatch().countDown());
           allPassThroughs.add(passThrough);
           eachPassThroughChildren.add(passThrough);
         }

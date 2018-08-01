@@ -26,10 +26,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
-import org.kurento.client.EndOfStreamEvent;
-import org.kurento.client.EventListener;
 import org.kurento.client.FaceOverlayFilter;
-import org.kurento.client.MediaFlowInStateChangeEvent;
 import org.kurento.client.MediaFlowState;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.PlayerEndpoint;
@@ -108,13 +105,10 @@ public class PlayerWithFilterAndWebRtcTest extends StabilityTest {
     MediaPipeline mp = kurentoClient.createMediaPipeline();
     PlayerEndpoint playerEp = new PlayerEndpoint.Builder(mp, mediaUrl).build();
 
-    playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
-      @Override
-      public void onEvent(EndOfStreamEvent event) {
+    playerEp.addEndOfStreamListener(event -> {
         log.debug("Received EndOfStream Event");
         eosLatch.countDown();
-      }
-    });
+      });
 
     FaceOverlayFilter filter = new FaceOverlayFilter.Builder(mp).build();
     WebRtcEndpoint webRtcEp = new WebRtcEndpoint.Builder(mp).build();
@@ -126,17 +120,13 @@ public class PlayerWithFilterAndWebRtcTest extends StabilityTest {
     getPage().initWebRtc(webRtcEp, WebRtcChannel.AUDIO_AND_VIDEO, WebRtcMode.RCV_ONLY);
     playerEp.play();
 
-    webRtcEp.addMediaFlowInStateChangeListener(new EventListener<MediaFlowInStateChangeEvent>() {
-
-      @Override
-      public void onEvent(MediaFlowInStateChangeEvent event) {
+    webRtcEp.addMediaFlowInStateChangeListener(event -> {
         if (event.getState().equals(MediaFlowState.FLOWING)) {
           if (flowingLatch.getCount() != 0) {
             flowingLatch.countDown();
           }
         }
-      }
-    });
+      });
 
     Assert.assertTrue("Not received FLOWING IN event in webRtcEp: " + mediaUrl,
         flowingLatch.await(getPage().getTimeout(), TimeUnit.SECONDS));

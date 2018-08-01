@@ -29,8 +29,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
 import org.kurento.client.Continuation;
-import org.kurento.client.ErrorEvent;
-import org.kurento.client.EventListener;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.MediaProfileSpecType;
 import org.kurento.client.PlayerEndpoint;
@@ -204,14 +202,10 @@ public class RecorderSwitchPlayerTest extends BaseRecorder {
     MediaPipeline mp = kurentoClient.createMediaPipeline();
     final CountDownLatch errorPipelinelatch = new CountDownLatch(1);
 
-    mp.addErrorListener(new EventListener<ErrorEvent>() {
-
-      @Override
-      public void onEvent(ErrorEvent event) {
+    mp.addErrorListener(event -> {
         msgError = "Description:" + event.getDescription() + "; Error code:" + event.getType();
         errorPipelinelatch.countDown();
-      }
-    });
+      });
 
     int numPlayers = mediaUrls.length;
     PlayerEndpoint[] players = new PlayerEndpoint[numPlayers];

@@ -24,8 +24,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
-import org.kurento.client.EventListener;
-import org.kurento.client.MediaFlowInStateChangeEvent;
 import org.kurento.client.MediaFlowState;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.WebRtcEndpoint;
@@ -85,15 +83,11 @@ public class WebRtcOneLoopbackTest extends FunctionalTest {
 
     final CountDownLatch flowingLatch = new CountDownLatch(1);
     webRtcEndpoint
-        .addMediaFlowInStateChangeListener(new EventListener<MediaFlowInStateChangeEvent>() {
-
-          @Override
-          public void onEvent(MediaFlowInStateChangeEvent event) {
+        .addMediaFlowInStateChangeListener(event -> {
             if (event.getState().equals(MediaFlowState.FLOWING)) {
               flowingLatch.countDown();
             }
-          }
-        });
+          });
 
     // Start WebRTC and wait for playing event
     getPage().subscribeEvents("playing");

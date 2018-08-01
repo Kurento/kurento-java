@@ -24,9 +24,6 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
-import org.kurento.client.EndOfStreamEvent;
-import org.kurento.client.EventListener;
-import org.kurento.client.MediaFlowInStateChangeEvent;
 import org.kurento.client.MediaFlowState;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.PlayerEndpoint;
@@ -94,23 +91,14 @@ public class SimplePlayer extends PlayerTest {
     playerEp.connect(webRtcEp);
 
     final CountDownLatch flowingLatch = new CountDownLatch(1);
-    webRtcEp.addMediaFlowInStateChangeListener(new EventListener<MediaFlowInStateChangeEvent>() {
-
-      @Override
-      public void onEvent(MediaFlowInStateChangeEvent event) {
+    webRtcEp.addMediaFlowInStateChangeListener(event -> {
         if (event.getState().equals(MediaFlowState.FLOWING)) {
           flowingLatch.countDown();
         }
-      }
-    });
+      });
 
     final CountDownLatch eosLatch = new CountDownLatch(1);
-    playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
-      @Override
-      public void onEvent(EndOfStreamEvent event) {
-        eosLatch.countDown();
-      }
-    });
+    playerEp.addEndOfStreamListener(event -> eosLatch.countDown());
 
     // Test execution
     getPage().subscribeEvents("playing");
@@ -172,23 +160,14 @@ public class SimplePlayer extends PlayerTest {
     playerEp.connect(webRtcEp);
 
     final CountDownLatch eosLatch = new CountDownLatch(1);
-    playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
-      @Override
-      public void onEvent(EndOfStreamEvent event) {
-        eosLatch.countDown();
-      }
-    });
+    playerEp.addEndOfStreamListener(event -> eosLatch.countDown());
 
     final CountDownLatch flowingLatch = new CountDownLatch(1);
-    webRtcEp.addMediaFlowInStateChangeListener(new EventListener<MediaFlowInStateChangeEvent>() {
-
-      @Override
-      public void onEvent(MediaFlowInStateChangeEvent event) {
+    webRtcEp.addMediaFlowInStateChangeListener(event -> {
         if (event.getState().equals(MediaFlowState.FLOWING)) {
           flowingLatch.countDown();
         }
-      }
-    });
+      });
 
     // Test execution
     getPage().subscribeEvents("playing");
@@ -268,23 +247,16 @@ public class SimplePlayer extends PlayerTest {
     final CountDownLatch eosLatch = new CountDownLatch(1);
     final CountDownLatch flowingLatch = new CountDownLatch(1);
 
-    playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
-      @Override
-      public void onEvent(EndOfStreamEvent event) {
+    playerEp.addEndOfStreamListener(event -> {
         log.debug("Received EndOfStream Event");
         eosLatch.countDown();
-      }
-    });
+      });
 
-    webRtcEp.addMediaFlowInStateChangeListener(new EventListener<MediaFlowInStateChangeEvent>() {
-
-      @Override
-      public void onEvent(MediaFlowInStateChangeEvent event) {
+    webRtcEp.addMediaFlowInStateChangeListener(event -> {
         if (event.getState().equals(MediaFlowState.FLOWING)) {
           flowingLatch.countDown();
         }
-      }
-    });
+      });
 
     // Test execution
     getPage().subscribeEvents("playing");

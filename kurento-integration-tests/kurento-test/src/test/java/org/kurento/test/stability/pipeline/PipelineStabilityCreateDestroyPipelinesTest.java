@@ -22,11 +22,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.kurento.client.EventListener;
 import org.kurento.client.ListenerSubscription;
 import org.kurento.client.MediaPipeline;
-import org.kurento.client.ObjectCreatedEvent;
-import org.kurento.client.ObjectDestroyedEvent;
 
 /**
  * Stability test for Pipelines. <br/>
@@ -71,22 +68,10 @@ public class PipelineStabilityCreateDestroyPipelinesTest extends BasePipeline {
     initMemory();
 
     ListenerSubscription listenerObjectCreated =
-        getServerManager().addObjectCreatedListener(new EventListener<ObjectCreatedEvent>() {
-
-          @Override
-          public void onEvent(ObjectCreatedEvent event) {
-            objectsLatch.getObjectsCreatedLatch().countDown();
-          }
-        });
+        getServerManager().addObjectCreatedListener(event -> objectsLatch.getObjectsCreatedLatch().countDown());
 
     ListenerSubscription listenerObjectDestroyed =
-        getServerManager().addObjectDestroyedListener(new EventListener<ObjectDestroyedEvent>() {
-
-          @Override
-          public void onEvent(ObjectDestroyedEvent event) {
-            objectsLatch.getObjectsDestroyedLatch().countDown();
-          }
-        });
+        getServerManager().addObjectDestroyedListener(event -> objectsLatch.getObjectsDestroyedLatch().countDown());
 
     int objectsToCreate = 0;
 

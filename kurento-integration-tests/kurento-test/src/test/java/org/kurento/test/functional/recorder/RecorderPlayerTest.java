@@ -28,8 +28,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
-import org.kurento.client.EndOfStreamEvent;
-import org.kurento.client.EventListener;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.MediaProfileSpecType;
 import org.kurento.client.PlayerEndpoint;
@@ -112,12 +110,7 @@ public class RecorderPlayerTest extends BaseRecorder {
     playerEp.connect(recorderEp);
 
     final CountDownLatch eosLatch = new CountDownLatch(1);
-    playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
-      @Override
-      public void onEvent(EndOfStreamEvent event) {
-        eosLatch.countDown();
-      }
-    });
+    playerEp.addEndOfStreamListener(event -> eosLatch.countDown());
 
     // Test execution #1. Play the video while it is recorded
     launchBrowser(mp, webRtcEp1, playerEp, recorderEp, expectedVideoCodec, expectedAudioCodec,

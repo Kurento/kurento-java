@@ -31,8 +31,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
 import org.kurento.client.Continuation;
-import org.kurento.client.EndOfStreamEvent;
-import org.kurento.client.EventListener;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.MediaProfileSpecType;
 import org.kurento.client.PlayerEndpoint;
@@ -118,36 +116,25 @@ public class RecorderStopTest extends BaseRecorder {
     playerEp.connect(recorderEp);
 
     final CountDownLatch eosLatch = new CountDownLatch(1);
-    playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
-      @Override
-      public void onEvent(EndOfStreamEvent event) {
-        eosLatch.countDown();
-      }
-    });
+    playerEp.addEndOfStreamListener(event -> eosLatch.countDown());
 
     // Test execution #1. Play the video while it is recorded
     launchBrowser(mp, webRtcEp1, playerEp, recorderEp, expectedVideoCodec, expectedAudioCodec,
         recordingFile, EXPECTED_COLOR, 0, 0, PLAYTIME);
 
     ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
-    executor.schedule(new Runnable() {
+    executor.schedule(() -> recorderEp.stopAndWait(new Continuation<Void>() {
 
-      @Override
-      public void run() {
-        recorderEp.stopAndWait(new Continuation<Void>() {
+	  @Override
+	  public void onSuccess(Void result) throws Exception {
+	    recorderLatch.countDown();
+	  }
 
-          @Override
-          public void onSuccess(Void result) throws Exception {
-            recorderLatch.countDown();
-          }
-
-          @Override
-          public void onError(Throwable cause) throws Exception {
-            recorderLatch.countDown();
-          }
-        });
-      }
-    }, PLAYTIME / 2, TimeUnit.SECONDS);
+	  @Override
+	  public void onError(Throwable cause) throws Exception {
+	    recorderLatch.countDown();
+	  }
+	}), PLAYTIME / 2, TimeUnit.SECONDS);
 
     // Wait for EOS
     Assert.assertTrue("No EOS event", eosLatch.await(getPage().getTimeout(), TimeUnit.SECONDS));

@@ -7,12 +7,10 @@
 	<parent>
 		<groupId>org.kurento</groupId>
 		<artifactId>kurento-qa-pom</artifactId>
-		<version>6.7.0</version>
+		<version>6.7.2-SNAPSHOT</version>
 		<relativePath /> <!-- lookup parent from repository -->
 	</parent>
-	<groupId>org.kurento</groupId>
 	<artifactId>kurento-parent-pom</artifactId>
-	<version>6.7.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
 
 	<!-- Project-level information -->
@@ -212,7 +210,7 @@
 
 		<!-- maven-enforcer-plugin -->
 		<maven.min.version>3.0.3</maven.min.version>
-		<jdk.min.version>${maven.compiler.source}</jdk.min.version>
+		<jdk.min.version>1.7</jdk.min.version>
 		<jdk.max.version>${maven.compiler.source}</jdk.max.version>
 
 		<!-- maven-eclipse-plugin -->

@@ -26,8 +26,6 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
-import org.kurento.client.EndOfStreamEvent;
-import org.kurento.client.EventListener;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.PlayerEndpoint;
 import org.kurento.client.Tag;
@@ -58,9 +56,7 @@ public class EventTagTest extends FunctionalTest {
 
     player.setSendTagsInEvents(true);
 
-    player.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
-      @Override
-      public void onEvent(EndOfStreamEvent event) {
+    player.addEndOfStreamListener(event -> {
         List<Tag> tags = event.getTags();
 
         for (Tag tag : tags) {
@@ -78,8 +74,7 @@ public class EventTagTest extends FunctionalTest {
             }
           }
         }
-      }
-    });
+      });
 
     player.play();
     // Guard time to reproduce the whole video
@@ -102,16 +97,13 @@ public class EventTagTest extends FunctionalTest {
     player.addTag("test_2", "value_2");
     player.addTag("test_3", "value_3");
 
-    player.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
-      @Override
-      public void onEvent(EndOfStreamEvent event) {
+    player.addEndOfStreamListener(event -> {
         List<Tag> tags = event.getTags();
 
         if (tags.size() == 0) {
           eventReceived.countDown();
         }
-      }
-    });
+      });
 
     player.play();
     // Guard time to reproduce the whole video
