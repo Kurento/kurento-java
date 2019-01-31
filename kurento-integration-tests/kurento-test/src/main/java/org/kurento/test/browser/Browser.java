@@ -227,6 +227,7 @@ public class Browser implements Closeable {
       log.debug("Browser {} loading url {}", getId(), url);
 
       driver.get(url.toString());
+      driver.navigate().refresh();
 
       log.debug("Browser {} initialized", getId());
 
@@ -328,6 +329,9 @@ public class Browser implements Closeable {
     // https://code.google.com/p/chromedriver/issues/detail?id=799
     options.addArguments("--test-type");
 
+    // To avoid problems with DevToolsActivePort
+    options.addArguments("--no-sandbox");
+
     if (protocol == Protocol.FILE) {
       // This flag allows reading local files in video tags
       options.addArguments("--allow-file-access-from-files");
@@ -347,7 +351,9 @@ public class Browser implements Closeable {
               + ", but this file doesn't exist.");
         }
 
-        log.debug("Using video {} in browser {}", video, id);
+        File videoFile = new File(video);
+        log.debug("Using video {} in browser {} (exists {}, {} bytes, can read {})", video, id,
+            videoFile.exists(), videoFile.length(), videoFile.canRead());
         options.addArguments("--use-file-for-fake-video-capture=" + video);
       }
     }
@@ -399,7 +405,7 @@ public class Browser implements Closeable {
   private void createDriver(DesiredCapabilities capabilities, Object options)
       throws MalformedURLException {
 
-    log.debug("Creating driver in scope {} for browser {}", scope, id);
+    log.debug("Creating driver in scope {} for browser '{}'", scope, id);
 
     if (scope == BrowserScope.SAUCELABS) {
       createSaucelabsDriver(capabilities);
@@ -707,12 +713,13 @@ public class Browser implements Closeable {
       kurentoTestJs += "return true;";
       this.executeScript(kurentoTestJs);
 
-      String recordingJs = "var recScript=window.document.createElement('script');";
-      recordingJs += "recScript.type='text/javascript';";
-      recordingJs += "recScript.src='https://cdn.webrtc-experiment.com/RecordRTC.js';";
-      recordingJs += "window.document.head.appendChild(recScript);";
-      recordingJs += "return true;";
-      this.executeScript(recordingJs);
+      // Disable RecordRTC.js injection
+      // String recordingJs = "var recScript=window.document.createElement('script');";
+      // recordingJs += "recScript.type='text/javascript';";
+      // recordingJs += "recScript.src='https://cdn.webrtc-experiment.com/RecordRTC.js';";
+      // recordingJs += "window.document.head.appendChild(recScript);";
+      // recordingJs += "return true;";
+      // this.executeScript(recordingJs);
     }
   }
 

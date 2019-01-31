@@ -229,7 +229,7 @@ public class JsonRpcConfiguration implements WebSocketConfigurer {
       if (handler.isSockJSEnabled()) {
         registration.withSockJS().setSessionCookieNeeded(false);
       }
-
+    
       if (handler.getLabel() != null) {
         wsHandler.setLabel(handler.getLabel());
       }
