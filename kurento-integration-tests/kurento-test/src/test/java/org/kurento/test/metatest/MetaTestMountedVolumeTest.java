@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
+import org.kurento.client.ErrorEvent;
+import org.kurento.client.EventListener;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.PlayerEndpoint;
 import org.kurento.test.base.KurentoClientBrowserTest;
@@ -55,10 +57,13 @@ public class MetaTestMountedVolumeTest extends KurentoClientBrowserTest<WebRtcTe
 
     final CountDownLatch latch = new CountDownLatch(1);
 
-    p.addErrorListener(event -> {
+    p.addErrorListener(new EventListener<ErrorEvent>() {
+      @Override
+      public void onEvent(ErrorEvent event) {
         log.warn("Error un player: " + event.getDescription());
         latch.countDown();
-      });
+      }
+    });
 
     p.play();
 

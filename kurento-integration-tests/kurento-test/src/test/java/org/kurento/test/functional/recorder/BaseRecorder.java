@@ -28,6 +28,8 @@ import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Assert;
 import org.kurento.client.Continuation;
+import org.kurento.client.EndOfStreamEvent;
+import org.kurento.client.EventListener;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.PlayerEndpoint;
 import org.kurento.client.RecorderEndpoint;
@@ -84,7 +86,12 @@ public class BaseRecorder extends FunctionalTest {
     getPage().initWebRtc(webRtcEp, WebRtcChannel.AUDIO_AND_VIDEO, WebRtcMode.RCV_ONLY);
     playerEp.play();
     final CountDownLatch eosLatch = new CountDownLatch(1);
-    playerEp.addEndOfStreamListener(event -> eosLatch.countDown());
+    playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
+      @Override
+      public void onEvent(EndOfStreamEvent event) {
+        eosLatch.countDown();
+      }
+    });
 
     if (recorderEp != null) {
       recorderEp.record();
@@ -248,7 +255,12 @@ public class BaseRecorder extends FunctionalTest {
     checkPage.subscribeEvents("playing");
     checkPage.initWebRtc(webRtcEp, WebRtcChannel.AUDIO_AND_VIDEO, WebRtcMode.RCV_ONLY);
     final CountDownLatch eosLatch = new CountDownLatch(1);
-    playerEp.addEndOfStreamListener(event -> eosLatch.countDown());
+    playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
+      @Override
+      public void onEvent(EndOfStreamEvent event) {
+        eosLatch.countDown();
+      }
+    });
     playerEp.play();
 
     // Assertions in recording

@@ -29,6 +29,8 @@ import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
 import org.kurento.client.Continuation;
 import org.kurento.client.CryptoSuite;
+import org.kurento.client.EventListener;
+import org.kurento.client.MediaFlowInStateChangeEvent;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.RtpEndpoint;
 import org.kurento.client.SDES;
@@ -94,7 +96,13 @@ public class AgnosticRtpEndpointToWebRtcWithFfmpegTest extends FunctionalTest {
 
     final CountDownLatch flowingInLatch = new CountDownLatch(1);
 
-    webRtcEp.addMediaFlowInStateChangeListener(event -> flowingInLatch.countDown());
+    webRtcEp.addMediaFlowInStateChangeListener(new EventListener<MediaFlowInStateChangeEvent>() {
+
+      @Override
+      public void onEvent(MediaFlowInStateChangeEvent event) {
+        flowingInLatch.countDown();
+      }
+    });
 
     rtpEp.connect(webRtcEp);
 

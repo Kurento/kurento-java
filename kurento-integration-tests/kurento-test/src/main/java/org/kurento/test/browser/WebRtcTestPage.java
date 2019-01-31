@@ -24,7 +24,10 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.codec.binary.Base64;
+import org.kurento.client.EventListener;
 import org.kurento.client.IceCandidate;
+import org.kurento.client.IceCandidateFoundEvent;
+import org.kurento.client.MediaStateChangedEvent;
 import org.kurento.client.WebRtcEndpoint;
 import org.kurento.commons.exception.KurentoException;
 import org.kurento.jsonrpc.JsonUtils;
@@ -318,7 +321,10 @@ public class WebRtcTestPage extends WebPage {
       final WebRtcCandidateType webRtcCandidateType, boolean useDataChannels)
       throws InterruptedException {
 
-    webRtcEndpoint.addIceCandidateFoundListener(event -> {
+    webRtcEndpoint.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
+
+      @Override
+      public void onEvent(IceCandidateFoundEvent event) {
         JsonObject candidate = JsonUtils.toJsonObject(event.getCandidate());
 
         if (!filterCandidate(candidate.get("candidate").getAsString(), webRtcIpvMode,
@@ -327,10 +333,16 @@ public class WebRtcTestPage extends WebPage {
               candidate.get("candidate").getAsString(), webRtcIpvMode, webRtcCandidateType);
           addIceCandidate(candidate);
         }
-      });
+      }
+    });
 
-    webRtcEndpoint.addMediaStateChangedListener(event -> log.debug("MediaStateChangedEvent from {} to {} on {} at {}", event.getOldState(),
-	    event.getNewState(), webRtcEndpoint.getId(), event.getTimestamp()));
+    webRtcEndpoint.addMediaStateChangedListener(new EventListener<MediaStateChangedEvent>() {
+      @Override
+      public void onEvent(MediaStateChangedEvent event) {
+        log.debug("MediaStateChangedEvent from {} to {} on {} at {}", event.getOldState(),
+            event.getNewState(), webRtcEndpoint.getId(), event.getTimestamp());
+      }
+    });
 
     WebRtcConfigurer webRtcConfigurer = new WebRtcConfigurer() {
       @Override

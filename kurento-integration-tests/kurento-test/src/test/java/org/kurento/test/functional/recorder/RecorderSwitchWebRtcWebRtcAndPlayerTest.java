@@ -30,6 +30,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
 import org.kurento.client.Continuation;
+import org.kurento.client.ErrorEvent;
+import org.kurento.client.EventListener;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.MediaProfileSpecType;
 import org.kurento.client.PlayerEndpoint;
@@ -138,10 +140,14 @@ public class RecorderSwitchWebRtcWebRtcAndPlayerTest extends BaseRecorder {
     MediaPipeline mp = kurentoClient.createMediaPipeline();
     final CountDownLatch errorPipelinelatch = new CountDownLatch(1);
 
-    mp.addErrorListener(event -> {
+    mp.addErrorListener(new EventListener<ErrorEvent>() {
+
+      @Override
+      public void onEvent(ErrorEvent event) {
         msgError = "Description:" + event.getDescription() + "; Error code:" + event.getType();
         errorPipelinelatch.countDown();
-      });
+      }
+    });
 
     WebRtcEndpoint webRtcEpRed = new WebRtcEndpoint.Builder(mp).build();
     PlayerEndpoint playerEp = new PlayerEndpoint.Builder(mp, mediaUrlPlayer).build();
@@ -210,10 +216,14 @@ public class RecorderSwitchWebRtcWebRtcAndPlayerTest extends BaseRecorder {
     MediaPipeline mp = kurentoClient.createMediaPipeline();
     final CountDownLatch errorPipelinelatch = new CountDownLatch(1);
 
-    mp.addErrorListener(event -> {
+    mp.addErrorListener(new EventListener<ErrorEvent>() {
+
+      @Override
+      public void onEvent(ErrorEvent event) {
         msgError = "Description:" + event.getDescription() + "; Error code:" + event.getType();
         errorPipelinelatch.countDown();
-      });
+      }
+    });
 
     WebRtcEndpoint webRtcEpRed = new WebRtcEndpoint.Builder(mp).build();
     WebRtcEndpoint webRtcEpGreen = new WebRtcEndpoint.Builder(mp).build();

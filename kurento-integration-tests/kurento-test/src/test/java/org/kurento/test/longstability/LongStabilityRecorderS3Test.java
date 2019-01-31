@@ -29,6 +29,8 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
 import org.kurento.client.Continuation;
+import org.kurento.client.ErrorEvent;
+import org.kurento.client.EventListener;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.MediaProfileSpecType;
 import org.kurento.client.RecorderEndpoint;
@@ -95,11 +97,15 @@ public class LongStabilityRecorderS3Test extends StabilityTest {
 
     final CountDownLatch errorPipelinelatch = new CountDownLatch(1);
 
-    mp.addErrorListener(event -> {
+    mp.addErrorListener(new EventListener<ErrorEvent>() {
+
+      @Override
+      public void onEvent(ErrorEvent event) {
         msgError = "Description:" + event.getDescription() + "; Error code:" + event.getType();
         log.error(msgError);
         errorPipelinelatch.countDown();
-      });
+      }
+    });
     final WebRtcEndpoint webRtcSender = new WebRtcEndpoint.Builder(mp).build();
 
     // WebRTC sender negotiation

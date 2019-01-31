@@ -27,6 +27,12 @@ public class AsyncEventManager<T extends MediaEvent> extends AsyncManager<T> {
   }
 
   public EventListener<T> getMediaEventListener() {
-    return event -> addResult(event);
+
+    return new EventListener<T>() {
+      @Override
+      public void onEvent(T event) {
+        addResult(event);
+      }
+    };
   }
 }

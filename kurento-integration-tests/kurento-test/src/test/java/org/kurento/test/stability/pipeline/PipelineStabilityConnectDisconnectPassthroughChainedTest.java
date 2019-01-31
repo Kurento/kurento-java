@@ -24,8 +24,13 @@ import java.util.concurrent.TimeUnit;
 
 import org.junit.Assert;
 import org.junit.Ignore;
+import org.kurento.client.ElementConnectedEvent;
+import org.kurento.client.ElementDisconnectedEvent;
+import org.kurento.client.EventListener;
 import org.kurento.client.ListenerSubscription;
 import org.kurento.client.MediaPipeline;
+import org.kurento.client.ObjectCreatedEvent;
+import org.kurento.client.ObjectDestroyedEvent;
 import org.kurento.client.PassThrough;
 
 /**
@@ -129,10 +134,22 @@ public class PipelineStabilityConnectDisconnectPassthroughChainedTest extends Ba
     initMemory();
 
     ListenerSubscription listenerObjectCreated =
-        getServerManager().addObjectCreatedListener(event -> objectsLatch.getObjectsCreatedLatch().countDown());
+        getServerManager().addObjectCreatedListener(new EventListener<ObjectCreatedEvent>() {
+
+          @Override
+          public void onEvent(ObjectCreatedEvent event) {
+            objectsLatch.getObjectsCreatedLatch().countDown();
+          }
+        });
 
     ListenerSubscription listenerObjectDestroyed =
-        getServerManager().addObjectDestroyedListener(event -> objectsLatch.getObjectsDestroyedLatch().countDown());
+        getServerManager().addObjectDestroyedListener(new EventListener<ObjectDestroyedEvent>() {
+
+          @Override
+          public void onEvent(ObjectDestroyedEvent event) {
+            objectsLatch.getObjectsDestroyedLatch().countDown();
+          }
+        });
 
     int passthroughToCreate = 0;
     int objectsToCreate = 0;
@@ -167,9 +184,21 @@ public class PipelineStabilityConnectDisconnectPassthroughChainedTest extends Ba
         // Create passthroughs
         for (int k = 0; k < passthroughToCreate; k++) {
           PassThrough passThrough = new PassThrough.Builder(mp).build();
-          passThrough.addElementConnectedListener(event -> connectionStateLatch.getStateConnectedLatch().countDown());
+          passThrough.addElementConnectedListener(new EventListener<ElementConnectedEvent>() {
 
-          passThrough.addElementDisconnectedListener(event -> connectionStateLatch.getStateDisconnectedLatch().countDown());
+            @Override
+            public void onEvent(ElementConnectedEvent event) {
+              connectionStateLatch.getStateConnectedLatch().countDown();
+            }
+          });
+
+          passThrough.addElementDisconnectedListener(new EventListener<ElementDisconnectedEvent>() {
+
+            @Override
+            public void onEvent(ElementDisconnectedEvent event) {
+              connectionStateLatch.getStateDisconnectedLatch().countDown();
+            }
+          });
           allPassThroughs.add(passThrough);
           eachPassThroughChildren.add(passThrough);
         }

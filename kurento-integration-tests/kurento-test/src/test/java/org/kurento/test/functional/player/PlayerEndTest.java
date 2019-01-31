@@ -23,6 +23,8 @@ import java.util.concurrent.TimeUnit;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runners.Parameterized.Parameters;
+import org.kurento.client.EndOfStreamEvent;
+import org.kurento.client.EventListener;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.PlayerEndpoint;
 import org.kurento.client.WebRtcEndpoint;
@@ -96,10 +98,13 @@ public class PlayerEndTest extends FunctionalTest {
     // Subscription to EOS event
     final boolean[] eos = new boolean[1];
     eos[0] = false;
-    playerEp.addEndOfStreamListener(event -> {
+    playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
+      @Override
+      public void onEvent(EndOfStreamEvent event) {
         log.error("EOS event received: {} {}", event.getType(), event.getTimestamp());
         eos[0] = true;
-      });
+      }
+    });
 
     // WebRTC in receive-only mode
     getPage().subscribeEvents("playing");

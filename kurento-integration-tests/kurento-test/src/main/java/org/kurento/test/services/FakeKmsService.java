@@ -33,6 +33,8 @@ import static org.kurento.test.config.TestConfiguration.KMS_WS_URI_PROP;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.kurento.client.EventListener;
+import org.kurento.client.IceCandidateFoundEvent;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.WebRtcEndpoint;
 import org.kurento.commons.exception.KurentoException;
@@ -116,9 +118,21 @@ public class FakeKmsService extends KmsService {
             }
 
             fakeOutputWebRtc
-                .addIceCandidateFoundListener(event -> fakeBrowser.addIceCandidate(event.getCandidate()));
+                .addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
 
-            fakeBrowser.addIceCandidateFoundListener(event -> fakeOutputWebRtc.addIceCandidate(event.getCandidate()));
+                  @Override
+                  public void onEvent(IceCandidateFoundEvent event) {
+                    fakeBrowser.addIceCandidate(event.getCandidate());
+                  }
+                });
+
+            fakeBrowser.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
+
+              @Override
+              public void onEvent(IceCandidateFoundEvent event) {
+                fakeOutputWebRtc.addIceCandidate(event.getCandidate());
+              }
+            });
 
             String sdpOffer = fakeBrowser.generateOffer();
             String sdpAnswer = fakeOutputWebRtc.processOffer(sdpOffer);
