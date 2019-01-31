@@ -12,7 +12,7 @@
 	</parent>
 	<groupId>org.kurento</groupId>
 	<artifactId>kurento-parent-pom</artifactId>
-	<version>6.7.2-SNAPSHOT</version>
+	<version>6.9.0</version>
 	<packaging>pom</packaging>
 
 	<!-- Project-level information -->
@@ -816,11 +816,6 @@
 				<version>${ApacheJMeter_core.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.seleniumhq.selenium</groupId>
-				<artifactId>selenium-server</artifactId>
-				<version>${selenium-java.version}</version>
-			</dependency>
-			<dependency>
 				<groupId>org.freemarker</groupId>
 				<artifactId>freemarker</artifactId>
 				<version>${freemarker.version}</version>
@@ -1538,7 +1533,7 @@
 		<repository>
 			<id>kurento-snapshots</id>
 			<name>Kurento Snapshots</name>
-			<url>https://maven.openvidu.io/archiva/repository/snapshots/</url>
+			<url>https://maven.openvidu.io/repository/snapshots/</url>
 			<releases>
 				<enabled>false</enabled>
 			</releases>
@@ -1551,7 +1546,7 @@
 		<pluginRepository>
 			<id>kurento-snapshots</id>
 			<name>Kurento Snapshots</name>
-			<url>https://maven.openvidu.io/archiva/repository/snapshots/</url>
+			<url>https://maven.openvidu.io/repository/snapshots/</url>
 			<releases>
 				<enabled>false</enabled>
 			</releases>

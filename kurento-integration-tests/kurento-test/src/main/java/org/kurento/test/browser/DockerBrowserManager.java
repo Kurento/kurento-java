@@ -36,7 +36,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -121,7 +120,8 @@ public class DockerBrowserManager {
             docker.startAndWaitNode(browserContainerName, type, browserContainerName, nodeImageId,
                 record);
             browserContainerIp =
-                docker.inspectContainer(browserContainerName).getNetworkSettings().getIpAddress();
+                docker.inspectContainer(browserContainerName).getNetworkSettings().getNetworks()
+                    .values().iterator().next().getIpAddress();
           }
 
           String driverUrl = String.format("http://%s:4444/wd/hub", browserContainerIp);
@@ -162,17 +162,17 @@ public class DockerBrowserManager {
           currentTimeMillis() + SECONDS.toMillis(WAIT_URL_TIMEOUT_SEC);
       do {
         try {
+          if (currentTimeMillis() > timeoutMs) {
+            throw new KurentoException("Timeout of " + WAIT_URL_TIMEOUT_SEC
+                + " seconds waiting for URL " + url);
+          }
           HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
           connection.setRequestMethod("HEAD");
           int responseCode = connection.getResponseCode();
           urlAvailable = responseCode >= 200 && responseCode < 500;
           if (!urlAvailable) {
-            if (currentTimeMillis() > timeoutMs) {
-              throw new KurentoException("Timeout of " + WAIT_URL_TIMEOUT_SEC
-                  + " seconds waiting for URL " + url);
-            }
             log.debug("URL {} is not still available (response {}) ... waiting {} ms", url,
-                    responseCode, WAIT_URL_POLL_TIME_MS);
+                responseCode, WAIT_URL_POLL_TIME_MS);
             sleep(WAIT_URL_POLL_TIME_MS);
           }
         } catch (ConnectException e) {
@@ -231,7 +231,7 @@ public class DockerBrowserManager {
           // Check timeout
           if (System.currentTimeMillis() > timeoutMs) {
             throw new KurentoException(
-                "Timeout of " + timeoutMs + " millis waiting to create a RemoteWebDriver",
+                "Timeout of " + timeoutSeconds + " seconds waiting to create a RemoteWebDriver",
                 e.getCause());
           }
 
@@ -284,8 +284,7 @@ public class DockerBrowserManager {
     this.downloadLogsPath = path;
   }
 
-  public RemoteWebDriver createDockerDriver(String id, DesiredCapabilities capabilities)
-      throws MalformedURLException {
+  public RemoteWebDriver createDockerDriver(String id, DesiredCapabilities capabilities) {
 
     DockerBrowser browser = new DockerBrowser(id, capabilities);
 
@@ -333,11 +332,11 @@ public class DockerBrowserManager {
 
   private void downloadLogsForContainer(String container, String logName) {
 
-    if (docker.existsContainer(container) && downloadLogsPath != null) {
+    if (downloadLogsPath != null) {
 
       try {
 
-        String logFileName = new File(KurentoTest.getDefaultOutputFile("-" + logName + ".log"))
+        String logFileName = new File(KurentoTest.getDefaultOutputFile("-" + logName + "-container.log"))
             .getAbsolutePath();
         Path logFile = downloadLogsPath.resolve(logFileName);
 
