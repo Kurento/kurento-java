@@ -242,23 +242,23 @@ public class JsonRpcClientNettyWebSocket extends AbstractJsonRpcClientWebSocket 
 
       Bootstrap b = new Bootstrap();
       b.group(group).channel(NioSocketChannel.class)
-              .handler(new ChannelInitializer<SocketChannel>() {
-                @Override
-                protected void initChannel(SocketChannel ch) {
-                  log.info("{} Initiating new Netty channel. Will create new handler too!", label);
-                  handler = new JsonRpcWebSocketClientHandler(
-                          WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null,
-                                  true, new DefaultHttpHeaders(), maxPacketSize));
+          .handler(new ChannelInitializer<SocketChannel>() {
+            @Override
+            protected void initChannel(SocketChannel ch) {
+              log.info("{} Initiating new Netty channel. Will create new handler too!", label);
+              handler = new JsonRpcWebSocketClientHandler(
+                  WebSocketClientHandshakerFactory.newHandshaker(uri, WebSocketVersion.V13, null,
+                      true, new DefaultHttpHeaders(), maxPacketSize));
 
-                  ChannelPipeline p = ch.pipeline();
-                  p.addLast("idleStateHandler", new IdleStateHandler(0, 0, idleTimeout / 1000));
-                  if (sslCtx != null) {
-                    p.addLast(sslCtx.newHandler(ch.alloc(), host, port));
-                  }
-                  p.addLast(new HttpClientCodec(), new HttpObjectAggregator(8192),
-                          WebSocketClientCompressionHandler.INSTANCE, handler);
-                }
-              }).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, this.connectionTimeout);
+              ChannelPipeline p = ch.pipeline();
+              p.addLast("idleStateHandler", new IdleStateHandler(0, 0, idleTimeout / 1000));
+              if (sslCtx != null) {
+                p.addLast(sslCtx.newHandler(ch.alloc(), host, port));
+              }
+              p.addLast(new HttpClientCodec(), new HttpObjectAggregator(8192),
+                  WebSocketClientCompressionHandler.INSTANCE, handler);
+            }
+          }).option(ChannelOption.CONNECT_TIMEOUT_MILLIS, this.connectionTimeout);
 
       int numRetries = 0;
       final int maxRetries = 5;
@@ -269,8 +269,7 @@ public class JsonRpcClientNettyWebSocket extends AbstractJsonRpcClientWebSocket 
             handleTimeout(future);
             this.channel = future.channel();
           } else {
-            channel = future.sync()
-                    .channel();
+            channel = future.sync().channel();
           }
           future = handler.handshakeFuture();
           if (channelTimeout) {
@@ -283,11 +282,11 @@ public class JsonRpcClientNettyWebSocket extends AbstractJsonRpcClientWebSocket 
           log.warn("{} ERROR connecting WS Netty client, opening channel", label, e);
         } catch (Exception e) {
           if (e.getCause() instanceof WebSocketHandshakeException
-                  || e.getCause() instanceof TimeoutException
-                  && numRetries < maxRetries) {
+              || e.getCause() instanceof TimeoutException
+              && numRetries < maxRetries) {
             log.warn(
-                    "{} Upgrade exception when trying to connect to {}. Try {} of {}. Retrying in 200ms ",
-                    label, uri, numRetries + 1, maxRetries);
+                "{} Upgrade exception when trying to connect to {}. Try {} of {}. Retrying in 200ms ",
+                label, uri, numRetries + 1, maxRetries);
             Thread.sleep(200);
             numRetries++;
           } else {
