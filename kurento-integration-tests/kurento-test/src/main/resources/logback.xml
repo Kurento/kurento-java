@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-	<!-- <statusListener class="ch.qos.logback.core.status.NopStatusListener" 
-		/> -->
+	<!--
+	<statusListener class="ch.qos.logback.core.status.NopStatusListener" />
+	-->
 
 	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
 		<encoder>
@@ -14,11 +15,12 @@
 		<appender-ref ref="CONSOLE" />
 	</root>
 
-	<logger name="org.apache.catalina.startup.DigesterFactory" level="ERROR" />
-	<logger name="org.kurento.test.Shell" level="WARN" />
+	<logger name="com.github.dockerjava" level="TRACE" />
 	<logger name="org.apache" level="WARN" />
-	<logger name="org.springframework" level="WARN" />
+	<logger name="org.apache.catalina.startup.DigesterFactory" level="ERROR" />
 	<logger name="org.eclipse.jetty" level="WARN" />
-	<logger name="org.kurento" level="DEBUG" />
+	<logger name="org.kurento" level="TRACE" />
+	<logger name="org.kurento.test.Shell" level="WARN" />
+	<logger name="org.springframework" level="WARN" />
 
 </configuration>
