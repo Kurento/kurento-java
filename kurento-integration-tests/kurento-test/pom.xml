@@ -108,21 +108,6 @@
 			<artifactId>xml-apis</artifactId>
 		</dependency>
 
-		<!-- JMeter -->
-		<dependency>
-			<groupId>com.lazerycode.jmeter</groupId>
-			<artifactId>jmeter-maven-plugin</artifactId>
-			<exclusions>
-				<exclusion>
-					<artifactId>backport-util-concurrent</artifactId>
-					<groupId>backport-util-concurrent</groupId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.jmeter</groupId>
-			<artifactId>ApacheJMeter_core</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.freemarker</groupId>
 			<artifactId>freemarker</artifactId>
