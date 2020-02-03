@@ -339,19 +339,25 @@ public class KmsService extends TestService {
   }
 
   private boolean isFreePort(String wsUri) {
+    URI wsUrl;
     try {
-      URI wsUrl = new URI(wsUri);
-      String result = Shell.runAndWait("/bin/bash", "-c",
-          "nc -z " + wsUrl.getHost() + " " + wsUrl.getPort() + "; echo $?");
-      if (result.trim().equals("0")) {
-        log.warn("Port " + wsUrl.getPort()
-            + " is used. Maybe another KMS instance is running in this port");
-        return false;
-      }
+      wsUrl = new URI(wsUri);
     } catch (URISyntaxException e) {
       log.warn("WebSocket URI {} is malformed: " + e.getMessage(), wsUri);
+      return false;
     }
-    return true;
+
+    Shell.ProcessResult result = Shell.runAndWaitResult("netcat", "-z", wsUrl.getHost(),
+        String.valueOf(wsUrl.getPort()));
+
+    if (result.exitCode == 1) {
+      // If netcat returns 1, it means that the port is not in use
+      return true;
+    }
+
+    log.warn("Port " + wsUrl.getPort()
+        + " is in use. Maybe another KMS instance is running in this port?");
+    return false;
   }
 
   private void createKurentoConf() {
