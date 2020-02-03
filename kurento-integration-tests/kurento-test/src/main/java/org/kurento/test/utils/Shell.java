@@ -35,23 +35,33 @@ import com.google.common.io.CharStreams;
  */
 public class Shell {
 
+  public static class ProcessResult {
+    public String output;
+    public int exitCode;
+
+    public ProcessResult(String output, int exitCode) {
+      this.output = output;
+      this.exitCode = exitCode;
+    }
+  }
+
   public static Logger log = LoggerFactory.getLogger(Shell.class);
 
   public static Process run(final String... command) {
     return run(true, command);
   }
 
-  public static Process run(boolean redirectOutputs, final String... command) {
+  public static Process run(final boolean redirectOutputs, final String... command) {
     log.trace("Running command on the shell: {}", Arrays.toString(command));
 
     try {
-      ProcessBuilder p = new ProcessBuilder(command);
+      final ProcessBuilder p = new ProcessBuilder(command);
       p.redirectErrorStream(true);
       if (redirectOutputs) {
         p.redirectOutput(ProcessBuilder.Redirect.INHERIT);
       }
       return p.start();
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(
           "Exception while executing command '" + Arrays.toString(command) + "'", e);
     }
@@ -61,32 +71,41 @@ public class Shell {
     return runAndWait(command.split(" "));
   }
 
-  public static String runAndWaitArray(final String[] command) {
-    log.trace("Running command on the shell: {}", Arrays.toString(command));
-    String result = runAndWaitNoLog(command);
-    log.trace("Result:" + result);
-    return result;
+  public static String runAndWait(final String... command) {
+    return runAndWaitArray(command).output;
   }
 
-  public static String runAndWait(final String... command) {
+  public static ProcessResult runAndWaitResult(final String... command) {
     return runAndWaitArray(command);
   }
 
-  public static String runAndWaitNoLog(final String... command) {
-    Process p;
+  public static ProcessResult runAndWaitArray(final String[] command) {
+    log.trace("Running command on the shell: {}", Arrays.toString(command));
+    final ProcessResult result = runAndWaitNoLog(command);
+
+    log.trace("Command output:" + result.output);
+    log.trace("Command exit code:" + result.exitCode);
+
+    return result;
+  }
+
+  public static ProcessResult runAndWaitNoLog(final String... command) {
+    String output = "";
+    int exitCode = 0;
+
     try {
-      p = new ProcessBuilder(command).redirectErrorStream(true).start();
-
-      String output = CharStreams.toString(new InputStreamReader(p.getInputStream(), "UTF-8"));
-
-      p.destroy();
-
-      return output;
-
-    } catch (IOException e) {
+      Process process = new ProcessBuilder(command).redirectErrorStream(true).start();
+      output = CharStreams.toString(new InputStreamReader(process.getInputStream(), "UTF-8"));
+      exitCode = process.waitFor();
+    } catch (final InterruptedException e) {
+      output = "(interrupted)";
+      exitCode = 1;
+    } catch (final IOException e) {
       throw new KurentoException(
           "Exception executing command on the shell: " + Arrays.toString(command), e);
     }
+
+    return new ProcessResult(output, exitCode);
   }
 
 }
