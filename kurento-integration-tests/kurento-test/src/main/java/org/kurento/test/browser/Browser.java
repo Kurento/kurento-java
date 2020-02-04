@@ -340,6 +340,10 @@ public class Browser implements Closeable {
     // To avoid problems with DevToolsActivePort
     options.addArguments("--no-sandbox");
 
+    // Disables the default requirement of having the user make some gesture
+    // (e.g. button click) before being able to play unmuted videos
+    options.addArguments("--autoplay-policy=no-user-gesture-required");
+
     if (protocol == Protocol.FILE) {
       // This flag allows reading local files in video tags
       options.addArguments("--allow-file-access-from-files");

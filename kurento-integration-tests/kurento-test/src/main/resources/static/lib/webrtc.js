@@ -157,6 +157,10 @@ function startSendRecv() {
 				if (error) {
 					onError(error);
 				}
+
+				console.log("WebRtcPeerSendrecv created; start local video");
+				startVideo(local);
+
 				webRtcPeer.generateOffer(onOffer);
 			});
 }
@@ -187,6 +191,10 @@ function startSendOnly() {
 				if (error) {
 					onError(error);
 				}
+
+				console.log("WebRtcPeerSendonly created; start local video");
+				startVideo(local);
+
 				webRtcPeer.generateOffer(onOffer);
 			});
 }
@@ -217,6 +225,10 @@ function startRecvOnly() {
 				if (error) {
 					onError(error);
 				}
+
+				console.log("WebRtcPeerRecvonly created; start local video");
+				startVideo(local);
+
 				webRtcPeer.generateOffer(onOffer);
 			});
 }
@@ -226,7 +238,7 @@ function onError(error) {
 }
 
 function onOffer(error, offer) {
-	console.info("SDP offer:");
+	console.info("SDP Offer:", offer);
 	sdpOffer = offer;
 }
 
@@ -242,12 +254,28 @@ function addIceCandidate(serverCandidate) {
 
 function processSdpAnswer(answer) {
 	var sdpAnswer = window.atob(answer);
-	console.info("SDP answer:");
-	console.info(sdpAnswer);
+	console.info("SDP answer:", sdpAnswer);
 
 	webRtcPeer.processAnswer(sdpAnswer, function(error) {
-		if (error)
+		if (error) {
 			return console.error(error);
+		}
+
+		console.log("SDP Answer ready; start remote video");
+    	startVideo(video);
+	});
+}
+
+function startVideo(videoTag) {
+	// Manually start the <video> HTML element. This is used instead of the
+	// "autoplay" attribute, to work with newer browser security policies.
+	// Ref: https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video
+	videoTag.play().catch(err => {
+		if (err.name === "NotAllowedError") {
+			console.error("Browser doesn't allow playing video: " + err);
+		} else {
+			console.error("Error in video.play(): " + err);
+		}
 	});
 }
 
