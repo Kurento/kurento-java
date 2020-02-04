@@ -135,7 +135,7 @@
 		<overthere.version>5.0.4</overthere.version>
 		<jfreechart.version>1.0.19</jfreechart.version>
 		<version.ocr>4.0.0-1.4.4</version.ocr>
-		<webdrivermanager.version>3.6.1</webdrivermanager.version>
+		<webdrivermanager.version>3.8.1</webdrivermanager.version>
 		<docker-java.version>3.1.5</docker-java.version>
 		<jackson.version>2.9.9</jackson.version>
 		<assertj.version>3.12.2</assertj.version>
