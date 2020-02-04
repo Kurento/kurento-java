@@ -145,7 +145,7 @@ public class TestConfiguration {
 
   public static final String KMS_SERVER_DEBUG_PROP = "kms.debug";
   public static final String KMS_SERVER_DEBUG_DEFAULT =
-      "2,*media_server*:5,*Kurento*:5,KurentoMediaServerServiceHandler:7";
+      "3,Kurento*:5,kms*:5,sdp*:4,webrtc*:4,*rtpendpoint:4,rtp*handler:4,rtpsynchronizer:4,agnosticbin:4";
 
   public static final String KMS_LOGIN_PROP = "kms.login";
   public static final String KMS_PASSWD_PROP = "kms.passwd";
