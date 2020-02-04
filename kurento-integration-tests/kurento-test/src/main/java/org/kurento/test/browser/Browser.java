@@ -340,6 +340,10 @@ public class Browser implements Closeable {
     // To avoid problems with DevToolsActivePort
     options.addArguments("--no-sandbox");
 
+    // Skips the error page "Your connection is not private", caused by a
+    // missing HTTPS certificate installed in localhost
+    options.addArguments("--allow-insecure-localhost");
+
     // Disables the default requirement of having the user make some gesture
     // (e.g. button click) before being able to play unmuted videos
     options.addArguments("--autoplay-policy=no-user-gesture-required");
