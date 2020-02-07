@@ -391,8 +391,13 @@ public class Browser implements Closeable {
     // This flag force to use fake user media (synthetic video of multiple color)
     firefoxOptions.addPreference("media.navigator.streams.fake", true);
 
+    // Disable requiring a user gesture before unmuted videos can autoplay
+    firefoxOptions.addPreference("media.autoplay.default", 0);
+    firefoxOptions.addPreference("media.autoplay.enabled.user-gestures-needed", false);
+
     // This allows to load pages with self-signed certificates
     capabilities.setCapability("acceptInsecureCerts", true);
+
     firefoxOptions.setAcceptInsecureCerts(true);
 
     capabilities.setCapability(FIREFOX_OPTIONS, firefoxOptions);
