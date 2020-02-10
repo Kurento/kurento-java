@@ -1,6 +1,7 @@
 
 package org.kurento.test.utils;
 
+import java.text.DecimalFormat;
 import java.util.TimerTask;
 import java.util.concurrent.CountDownLatch;
 
@@ -21,6 +22,7 @@ public class CheckAudioTimerTask extends TimerTask {
 
   private final CountDownLatch errorContinuityAudiolatch;
   private final WebRtcTestPage page;
+
   private long lastPacketsReceived = 0;
   private double lastTimestamp = 0.0;
   private long currentPacketsReceived = 0;
@@ -36,7 +38,6 @@ public class CheckAudioTimerTask extends TimerTask {
 
   @Override
   public void run() {
-
     PeerConnectionStats stats = page.getRtcStats();
     if (count != 0) {
       lastPacketsReceived = currentPacketsReceived;
@@ -45,12 +46,14 @@ public class CheckAudioTimerTask extends TimerTask {
 
     currentPacketsReceived = page.getPeerConnAudioPacketsRecv(stats);
     currentTimestamp = page.getPeerConnAudioInboundTimestamp(stats);
+
     diffTimestamp = currentTimestamp - lastTimestamp;
     count++;
 
     if (lastTimestamp > 0.0) {
-      log.debug("Total audio packets received: {} in {} ms",
-          (currentPacketsReceived - lastPacketsReceived), diffTimestamp);
+      log.debug("Audio packets received: {} in {} ms",
+          (currentPacketsReceived - lastPacketsReceived),
+          new DecimalFormat("0.00").format(diffTimestamp));
     }
 
     if (((currentPacketsReceived - lastPacketsReceived) == 0) && (lastTimestamp > 0.0)) {

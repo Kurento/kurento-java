@@ -104,6 +104,7 @@ public class RepositoryRecorderTest extends RepositoryFunctionalTest {
     playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
       @Override
       public void onEvent(EndOfStreamEvent event) {
+        log.debug("[Kms.PlayerEndpoint.EndOfStream] Event received");
         eosLatch.countDown();
       }
     });
@@ -143,9 +144,11 @@ public class RepositoryRecorderTest extends RepositoryFunctionalTest {
     getPage().initWebRtc(webRtcEp, WebRtcChannel.AUDIO_AND_VIDEO, WebRtcMode.RCV_ONLY);
     playerEp.play();
     final CountDownLatch eosLatch = new CountDownLatch(1);
+
     playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
       @Override
       public void onEvent(EndOfStreamEvent event) {
+        log.debug("[Kms.PlayerEndpoint.EndOfStream] Event received");
         eosLatch.countDown();
       }
     });

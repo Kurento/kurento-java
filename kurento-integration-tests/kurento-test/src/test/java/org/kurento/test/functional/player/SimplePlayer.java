@@ -95,9 +95,11 @@ public class SimplePlayer extends PlayerTest {
 
     final CountDownLatch flowingLatch = new CountDownLatch(1);
     webRtcEp.addMediaFlowInStateChangeListener(new EventListener<MediaFlowInStateChangeEvent>() {
-
       @Override
       public void onEvent(MediaFlowInStateChangeEvent event) {
+        log.debug(
+            "[Kms.WebRtcEndpoint.MediaFlowInStateChange] -> endpoint: {}, mediaType: {}, state: {}",
+            webRtcEp.getId(), event.getMediaType(), event.getState());
         if (event.getState().equals(MediaFlowState.FLOWING)) {
           flowingLatch.countDown();
         }
@@ -108,6 +110,7 @@ public class SimplePlayer extends PlayerTest {
     playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
       @Override
       public void onEvent(EndOfStreamEvent event) {
+        log.debug("[Kms.PlayerEndpoint.EndOfStream] Event received");
         eosLatch.countDown();
       }
     });
@@ -119,16 +122,15 @@ public class SimplePlayer extends PlayerTest {
 
     // Assertions
     Assert.assertTrue(
-        "Not received FLOWING IN event in webRtcEp: " + mediaUrl + " " + webRtcChannel,
+        String.format("Not received FLOWING IN event in webRtcEp: %s %s", mediaUrl, webRtcChannel),
         flowingLatch.await(getPage().getTimeout(), TimeUnit.SECONDS));
 
-    Assert.assertTrue(
-        "Not received media (timeout waiting playing event): " + mediaUrl + " " + webRtcChannel,
-        getPage().waitForEvent("playing"));
+    Assert.assertTrue(String.format("Not received media (timeout waiting for 'playing' event): %s %s",
+        mediaUrl, webRtcChannel), getPage().waitForEvent("playing"));
 
     if (webRtcChannel == WebRtcChannel.AUDIO_ONLY
         || webRtcChannel == WebRtcChannel.AUDIO_AND_VIDEO) {
-      // Checking continuity of the audio
+      // Check continuous reception of audio packets
       getPage().activatePeerConnectionInboundStats("webRtcPeer.peerConnection");
 
       gettingStats.schedule(new CheckAudioTimerTask(errorContinuityAudiolatch, getPage()), 100,
@@ -136,23 +138,32 @@ public class SimplePlayer extends PlayerTest {
     }
 
     if (webRtcChannel != WebRtcChannel.AUDIO_ONLY) {
-      Assert.assertTrue("The color of the video should be " + expectedColor + ": " + mediaUrl + " "
-          + webRtcChannel, getPage().similarColorAt(expectedColor, x, y));
+      Assert.assertTrue(
+          String.format("The color of the video should be %s at point (%d, %d): %s %s",
+              expectedColor, x, y, mediaUrl, webRtcChannel),
+          getPage().similarColorAt(expectedColor, x, y));
     }
+
     Assert.assertTrue("Not received EOS event in player: " + mediaUrl + " " + webRtcChannel,
         eosLatch.await(getPage().getTimeout(), TimeUnit.SECONDS));
+
     gettingStats.cancel();
 
-    double currentTime = getPage().getCurrentTime();
-    if (playtime > 0) {
-      Assert.assertTrue("Error in play time (expected: " + playtime + " sec, real: " + currentTime
-          + " sec): " + mediaUrl + " " + webRtcChannel, getPage().compare(playtime, currentTime));
+    final double currentTime = getPage().getCurrentTime();
+    if (playtime > 0.0) {
+      Assert.assertTrue(String.format(
+          "Error in play time (expected: %.2fs, allowed: [%.2f, %.2f]s, real: %.2fs), URL: '%s', channel: %s",
+          playtime, playtime - getPage().getThresholdTime(),
+          playtime + getPage().getThresholdTime(), currentTime, mediaUrl, webRtcChannel),
+          getPage().compare(playtime, currentTime));
     }
 
     if (webRtcChannel == WebRtcChannel.AUDIO_ONLY
         || webRtcChannel == WebRtcChannel.AUDIO_AND_VIDEO) {
-      Assert.assertTrue("Check audio. There were more than 2 seconds without receiving packets",
-          errorContinuityAudiolatch.getCount() == 1);
+      Assert.assertTrue(
+          String.format("Audio is missing: more than %.2f seconds without receiving packets",
+              thresholdTime),
+          audioReceptionLatch.getCount() == 1);
     }
 
     // Release Media Pipeline
@@ -175,15 +186,18 @@ public class SimplePlayer extends PlayerTest {
     playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
       @Override
       public void onEvent(EndOfStreamEvent event) {
+        log.debug("[Kms.PlayerEndpoint.EndOfStream] Event received");
         eosLatch.countDown();
       }
     });
 
     final CountDownLatch flowingLatch = new CountDownLatch(1);
     webRtcEp.addMediaFlowInStateChangeListener(new EventListener<MediaFlowInStateChangeEvent>() {
-
       @Override
       public void onEvent(MediaFlowInStateChangeEvent event) {
+        log.debug(
+            "[Kms.WebRtcEndpoint.MediaFlowInStateChange] -> endpoint: {}, mediaType: {}, state: {}",
+            webRtcEp.getId(), event.getMediaType(), event.getState());
         if (event.getState().equals(MediaFlowState.FLOWING)) {
           flowingLatch.countDown();
         }
@@ -271,15 +285,17 @@ public class SimplePlayer extends PlayerTest {
     playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
       @Override
       public void onEvent(EndOfStreamEvent event) {
-        log.debug("Received EndOfStream Event");
+        log.debug("[Kms.PlayerEndpoint.EndOfStream] Event received");
         eosLatch.countDown();
       }
     });
 
     webRtcEp.addMediaFlowInStateChangeListener(new EventListener<MediaFlowInStateChangeEvent>() {
-
       @Override
       public void onEvent(MediaFlowInStateChangeEvent event) {
+        log.debug(
+            "[Kms.WebRtcEndpoint.MediaFlowInStateChange] -> endpoint: {}, mediaType: {}, state: {}",
+            webRtcEp.getId(), event.getMediaType(), event.getState());
         if (event.getState().equals(MediaFlowState.FLOWING)) {
           flowingLatch.countDown();
         }

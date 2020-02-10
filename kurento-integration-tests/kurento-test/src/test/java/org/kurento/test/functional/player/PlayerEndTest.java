@@ -101,7 +101,8 @@ public class PlayerEndTest extends FunctionalTest {
     playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
       @Override
       public void onEvent(EndOfStreamEvent event) {
-        log.error("EOS event received: {} {}", event.getType(), event.getTimestamp());
+        log.error("[Kms.PlayerEndpoint.EndOfStream] Event received: {} {}", event.getType(),
+            event.getTimestamp());
         eos[0] = true;
       }
     });

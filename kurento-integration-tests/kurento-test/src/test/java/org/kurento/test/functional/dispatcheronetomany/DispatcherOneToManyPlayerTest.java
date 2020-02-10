@@ -114,6 +114,7 @@ public class DispatcherOneToManyPlayerTest extends FunctionalTest {
     playerEp2.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
       @Override
       public void onEvent(EndOfStreamEvent event) {
+        log.debug("[Kms.PlayerEndpoint.EndOfStream] Event received");
         eosLatch.countDown();
       }
     });

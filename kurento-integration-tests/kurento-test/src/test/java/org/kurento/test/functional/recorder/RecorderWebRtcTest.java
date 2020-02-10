@@ -206,6 +206,7 @@ public class RecorderWebRtcTest extends BaseRecorder {
     playerEp2.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
       @Override
       public void onEvent(EndOfStreamEvent event) {
+        log.debug("[Kms.PlayerEndpoint.EndOfStream] Event received");
         eosLatch.countDown();
       }
     });

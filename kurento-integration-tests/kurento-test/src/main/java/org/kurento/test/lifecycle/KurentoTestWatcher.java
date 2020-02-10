@@ -45,8 +45,8 @@ public class KurentoTestWatcher extends TestWatcher {
 
   @Override
   protected void succeeded(Description description) {
-    KurentoTest.logMessage("|       TEST SUCCEEDED: " + description.getClassName() + "."
-        + description.getMethodName());
+    KurentoTest.logMessage(
+        "| TEST SUCCEEDED: " + description.getClassName() + "." + description.getMethodName());
 
     invokeMethodsAnnotatedWith(SucceededTest.class, description.getTestClass(), null, description);
     succees = true;

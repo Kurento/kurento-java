@@ -111,7 +111,7 @@ public class PlayerWithFilterAndWebRtcTest extends StabilityTest {
     playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
       @Override
       public void onEvent(EndOfStreamEvent event) {
-        log.debug("Received EndOfStream Event");
+        log.debug("[Kms.PlayerEndpoint.EndOfStream] Event received");
         eosLatch.countDown();
       }
     });
@@ -127,9 +127,11 @@ public class PlayerWithFilterAndWebRtcTest extends StabilityTest {
     playerEp.play();
 
     webRtcEp.addMediaFlowInStateChangeListener(new EventListener<MediaFlowInStateChangeEvent>() {
-
       @Override
       public void onEvent(MediaFlowInStateChangeEvent event) {
+        log.debug(
+            "[Kms.WebRtcEndpoint.MediaFlowInStateChange] -> endpoint: {}, mediaType: {}, state: {}",
+            webRtcEp.getId(), event.getMediaType(), event.getState());
         if (event.getState().equals(MediaFlowState.FLOWING)) {
           if (flowingLatch.getCount() != 0) {
             flowingLatch.countDown();

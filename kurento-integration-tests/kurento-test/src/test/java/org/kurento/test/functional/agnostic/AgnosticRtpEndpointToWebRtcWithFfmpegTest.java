@@ -97,9 +97,11 @@ public class AgnosticRtpEndpointToWebRtcWithFfmpegTest extends FunctionalTest {
     final CountDownLatch flowingInLatch = new CountDownLatch(1);
 
     webRtcEp.addMediaFlowInStateChangeListener(new EventListener<MediaFlowInStateChangeEvent>() {
-
       @Override
       public void onEvent(MediaFlowInStateChangeEvent event) {
+        log.debug(
+            "[Kms.WebRtcEndpoint.MediaFlowInStateChange] -> endpoint: {}, mediaType: {}, state: {}",
+            webRtcEp.getId(), event.getMediaType(), event.getState());
         flowingInLatch.countDown();
       }
     });

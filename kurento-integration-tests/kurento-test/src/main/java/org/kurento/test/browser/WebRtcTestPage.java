@@ -19,6 +19,7 @@ package org.kurento.test.browser;
 
 import java.awt.Color;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
@@ -132,12 +133,15 @@ public class WebRtcTestPage extends WebPage {
 
   /*
    * getCurrentTime
+   *
+   * Returns a double value indicating the current playback position
+   * of the media, in seconds.
    */
   public double getCurrentTime() {
-    log.debug("getCurrentTime() called");
+    DecimalFormat df = new DecimalFormat("0.000000");
     double currentTime = Double.parseDouble(
         browser.getWebDriver().findElement(By.id("currentTime")).getAttribute("value"));
-    log.debug("getCurrentTime() result: {}", currentTime);
+    log.debug("getCurrentTime() result: {}", df.format(currentTime));
     return currentTime;
   }
 
@@ -340,14 +344,14 @@ public class WebRtcTestPage extends WebPage {
       throws InterruptedException {
 
     webRtcEndpoint.addIceCandidateFoundListener(new EventListener<IceCandidateFoundEvent>() {
-
       @Override
       public void onEvent(IceCandidateFoundEvent event) {
         JsonObject candidate = JsonUtils.toJsonObject(event.getCandidate());
 
         if (!filterCandidate(candidate.get("candidate").getAsString(), webRtcIpvMode,
             webRtcCandidateType)) {
-          log.debug("OnIceCandadite -> Adding candidate: {} IpvMode: {} CandidateType: {}",
+          log.debug(
+              "[Kms.WebRtcEndpoint.IceCandidateFound] -> Add candidate to browser: '{}', IpvMode: {} CandidateType: {}",
               candidate.get("candidate").getAsString(), webRtcIpvMode, webRtcCandidateType);
           addIceCandidate(candidate);
         }
@@ -357,8 +361,8 @@ public class WebRtcTestPage extends WebPage {
     webRtcEndpoint.addMediaStateChangedListener(new EventListener<MediaStateChangedEvent>() {
       @Override
       public void onEvent(MediaStateChangedEvent event) {
-        log.debug("MediaStateChangedEvent from {} to {} on {} at {}", event.getOldState(),
-            event.getNewState(), webRtcEndpoint.getId(), event.getTimestamp());
+        log.debug("[Kms.WebRtcEndpoint.MediaStateChanged] -> endpoint: {}, oldState: {}, newState: {}",
+            webRtcEndpoint.getId(), event.getOldState(), event.getNewState());
       }
     });
 
@@ -367,7 +371,8 @@ public class WebRtcTestPage extends WebPage {
       public void addIceCandidate(IceCandidate candidate) {
 
         if (!filterCandidate(candidate.getCandidate(), webRtcIpvMode, webRtcCandidateType)) {
-          log.debug("webRtcConfigurer -> Adding candidate: {} IpvMode: {} CandidateType: {}",
+          log.debug(
+              "[WebRtcConfigurer] -> Add candidate to KMS: '{}', IpvMode: {}, CandidateType: {}",
               candidate.getCandidate(), webRtcIpvMode, webRtcCandidateType);
           webRtcEndpoint.addIceCandidate(candidate);
         }
@@ -440,7 +445,6 @@ public class WebRtcTestPage extends WebPage {
                   new IceCandidate(jsonCandidate.get("candidate").getAsString(),
                       jsonCandidate.get("sdpMid").getAsString(),
                       jsonCandidate.get("sdpMLineIndex").getAsInt());
-              // log.debug("Adding candidate {}: {}", i, jsonCandidate);
               webRtcConfigurer.addIceCandidate(candidate);
               numCandidate++;
             }
@@ -497,9 +501,9 @@ public class WebRtcTestPage extends WebPage {
         // Wait to valid sdpOffer
         String sdpOffer = (String) browser.executeScriptAndWaitOutput("return sdpOffer;");
 
-        log.debug("SDP offer: {}", sdpOffer);
+        log.debug("SDP offer:\n{}", sdpOffer);
         String sdpAnswer = webRtcConfigurer.processOffer(sdpOffer);
-        log.debug("SDP answer: {}", sdpAnswer);
+        log.debug("SDP answer:\n{}", sdpAnswer);
 
         // Encoding in Base64 to avoid parsing errors in JavaScript
         sdpAnswer = new String(Base64.encodeBase64(sdpAnswer.getBytes()));

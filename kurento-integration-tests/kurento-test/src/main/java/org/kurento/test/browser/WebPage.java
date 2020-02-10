@@ -160,11 +160,11 @@ public class WebPage {
     boolean out = distance <= browser.getColorDistance();
     if (!out) {
       if (logWarn) {
-        log.warn("Color NOT detected in video stream. Expected: {}, Real: {}", expectedColorStr,
+        log.warn("Color NOT detected in video stream. Expected: {}, real: {}", expectedColorStr,
             realColorStr);
       }
     } else {
-      log.debug("Detected color in video stream. Expected: {}, Real: {}", expectedColorStr,
+      log.debug("Color detected in video stream. Expected: {}, real: {}", expectedColorStr,
           realColorStr);
     }
 
@@ -318,13 +318,15 @@ public class WebPage {
       if (browser != null && browser.getWebDriver() != null) {
         out = (Map<String, Object>) browser.executeScript("return kurentoTest.rtcStats;");
 
-        log.debug(">>>>>>>>>> kurentoTest.rtcStats {} {}", browser.getId(), out);
+        log.trace("kurentoTest.rtcStats, browser: '{}', stats: '{}'", browser.getId(),
+            out.toString());
       }
     } catch (WebDriverException we) {
       // If client is not ready to gather rtc statistics, we just log it
       // as warning (it is not an error itself)
-      log.warn("Client does not support RTC statistics" + " (variable rtcStats is not defined)");
+      log.warn("Client does not support RTC stats (variable 'rtcStats' is not defined)");
     }
+
     return new PeerConnectionStats(out);
   }
 
@@ -563,6 +565,7 @@ public class WebPage {
   @SuppressWarnings("deprecation")
   public void addEventListener(final String videoTag, final String eventType,
       final BrowserEventListener eventListener) {
+    log.debug("Browser call: '{}.addEventListener({})'", videoTag, eventType);
     Thread t = new Thread() {
       @Override
       public void run() {
@@ -580,8 +583,10 @@ public class WebPage {
                 }
               });
           eventListener.onEvent(eventType);
+        } catch (org.openqa.selenium.TimeoutException e) {
+          log.error("~~~ Timeout reached for 'addEventListener()': {}", e.getMessage());
         } catch (Throwable t) {
-          log.error("~~~ Exception in addEventListener {}", t.getMessage());
+          log.error("~~~ Exception calling 'addEventListener()': {}, stack trace:", t.getMessage());
           t.printStackTrace();
           this.interrupt();
           this.stop();

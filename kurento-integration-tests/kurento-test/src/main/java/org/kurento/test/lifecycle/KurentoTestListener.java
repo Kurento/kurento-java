@@ -117,8 +117,7 @@ public class KurentoTestListener extends RunListener {
 
     invokeServices(ServiceMethod.START, TEST);
 
-    KurentoTest
-        .logMessage("|       TEST STARTING: " + description.getClassName() + "." + methodName);
+    KurentoTest.logMessage("| TEST STARTING: " + description.getClassName() + "." + methodName);
   }
 
   @Override

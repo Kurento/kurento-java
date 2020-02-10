@@ -124,8 +124,9 @@ function sendDataByChannel(message) {
 }
 
 function onIceCandidate(candidate) {
-	console.log('Local candidate' + JSON.stringify(candidate));
-	iceCandidates.push(JSON.stringify(candidate));
+	const candidateStr = JSON.stringify(candidate);
+	console.log(`Local candidate: '${candidateStr}'`);
+	iceCandidates.push(candidateStr);
 }
 
 function startSendRecv() {
@@ -315,9 +316,10 @@ function initAudioDetection() {
 }
 
 function updateCurrentTime() {
+	// "video.currentTime" is the current playback position, in seconds
+	// https://developer.mozilla.org/en-US/docs/Web/HTML/Element/video#attr-currentTime
 	document.getElementById("currentTime").value = video.currentTime;
 }
-
 
 function addEventListener(type, callback) {
 	video.addEventListener(type, callback, false);

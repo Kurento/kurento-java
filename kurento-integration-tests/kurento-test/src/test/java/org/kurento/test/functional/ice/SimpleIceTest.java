@@ -156,9 +156,11 @@ public class SimpleIceTest extends FunctionalPlayerTest {
 
     webRtcEndpoint
         .addMediaFlowOutStateChangeListener(new EventListener<MediaFlowOutStateChangeEvent>() {
-
           @Override
           public void onEvent(MediaFlowOutStateChangeEvent event) {
+            log.debug(
+                "[Kms.WebRtcEndpoint.MediaFlowOutStateChange] -> endpoint: {}, mediaType: {}, state: {}",
+                webRtcEndpoint.getId(), event.getMediaType(), event.getState());
             if (event.getState().equals(MediaFlowState.FLOWING)) {
               eosLatch.countDown();
             }
@@ -246,9 +248,11 @@ public class SimpleIceTest extends FunctionalPlayerTest {
     });
 
     webRtcEp.addMediaFlowInStateChangeListener(new EventListener<MediaFlowInStateChangeEvent>() {
-
       @Override
       public void onEvent(MediaFlowInStateChangeEvent event) {
+        log.debug(
+            "[Kms.WebRtcEndpoint.MediaFlowInStateChange] -> endpoint: {}, mediaType: {}, state: {}",
+            webRtcEp.getId(), event.getMediaType(), event.getState());
         if (event.getState().equals(MediaFlowState.FLOWING)) {
           eosLatch.countDown();
         }
@@ -366,9 +370,11 @@ public class SimpleIceTest extends FunctionalPlayerTest {
 
     webRtcEpRcvOnly
         .addMediaFlowInStateChangeListener(new EventListener<MediaFlowInStateChangeEvent>() {
-
           @Override
           public void onEvent(MediaFlowInStateChangeEvent event) {
+            log.debug(
+                "[Kms.WebRtcEndpoint.MediaFlowInStateChange] -> endpoint: {}, mediaType: {}, state: {}",
+                webRtcEpRcvOnly.getId(), event.getMediaType(), event.getState());
             if (event.getState().equals(MediaFlowState.FLOWING)) {
               eosLatch.countDown();
             }

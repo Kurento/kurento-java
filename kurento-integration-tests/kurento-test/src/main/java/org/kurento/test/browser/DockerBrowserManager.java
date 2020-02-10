@@ -151,9 +151,8 @@ public class DockerBrowserManager {
 
       } while (driver == null);
 
-      log.debug("RemoteWebDriver for browser {} created (Version={}, Capabilities={})", id,
+      log.debug("RemoteWebDriver for browser '{}' created, Version: {}, Capabilities: {}", id,
           driver.getCapabilities().getVersion(), driver.getCapabilities());
-
     }
 
     public void waitForUrl(String url) {
@@ -171,14 +170,19 @@ public class DockerBrowserManager {
           int responseCode = connection.getResponseCode();
           urlAvailable = responseCode >= 200 && responseCode < 500;
           if (!urlAvailable) {
-            log.debug("URL {} is not still available (response {}) ... waiting {} ms", url,
+            log.debug("URL '{}' is not available (response code: {})... waiting {} ms", url,
                 responseCode, WAIT_URL_POLL_TIME_MS);
-            sleep(WAIT_URL_POLL_TIME_MS);
           }
         } catch (ConnectException e) {
-          log.trace("{} is not yet available", url);
-        } catch (IOException | InterruptedException e) {
-          log.error("Exception waiting for url {}", url, e);
+          log.trace("URL '{}' is not available yet... waiting {} ms", url, WAIT_URL_POLL_TIME_MS);
+        } catch (IOException e) {
+          log.error("Exception connecting to URL '{}'", url, e);
+        }
+
+        try {
+          sleep(WAIT_URL_POLL_TIME_MS);
+        } catch (InterruptedException e) {
+          log.error("Exception waiting for URL '{}'", url, e);
         }
       } while (!urlAvailable);
     }
@@ -186,7 +190,7 @@ public class DockerBrowserManager {
     private void createAndWaitRemoteDriver(final String driverUrl,
         final DesiredCapabilities capabilities) throws TimeoutException {
 
-      log.debug("Creating remote driver for browser {} in hub {}", id, driverUrl);
+      log.debug("Creating remote driver for browser '{}' in hub '{}'", id, driverUrl);
 
       int timeoutSeconds =
           getProperty(SELENIUM_MAX_DRIVER_ERROR_PROPERTY, SELENIUM_MAX_DRIVER_ERROR_DEFAULT);
@@ -211,7 +215,7 @@ public class DockerBrowserManager {
 
           SessionId sessionId = remoteDriver.getSessionId();
 
-          log.debug("Created selenium session {} for browser {}", sessionId, id);
+          log.debug("Created selenium session '{}' for browser '{}'", sessionId, id);
 
           driver = remoteDriver;
 
@@ -235,7 +239,7 @@ public class DockerBrowserManager {
                 e.getCause());
           }
 
-          log.debug("Exception creating RemoteWebDriver for browser \"{}\". Retrying...", id,
+          log.debug("Exception creating RemoteWebDriver for browser '{}'. Retrying...", id,
               e.getCause());
 
           // Poll time
@@ -302,12 +306,11 @@ public class DockerBrowserManager {
     DockerBrowser browser = browsers.remove(id);
 
     if (browser == null) {
-      log.warn("Browser " + id + " does not exists");
+      log.warn("Nothing to close: browser '{}' didn't exist", id);
       return;
     }
 
     browser.close();
-
   }
 
   private String calculateBrowserImageName(DesiredCapabilities capabilities) {
@@ -344,13 +347,13 @@ public class DockerBrowserManager {
           Files.createDirectories(logFile.getParent());
         }
 
-        log.debug("Downloading log for container {} in file {}", container,
+        log.debug("Downloading log for container '{}' in file '{}'", container,
             logFile.toAbsolutePath());
 
         docker.downloadLog(container, logFile);
 
       } catch (IOException e) {
-        log.warn("Exception writing logs for container {}", container, e);
+        log.warn("Error downloading log from container '{}'", container, e);
       }
     }
   }

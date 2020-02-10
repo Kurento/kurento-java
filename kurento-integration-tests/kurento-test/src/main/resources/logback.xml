@@ -15,12 +15,18 @@
 		<appender-ref ref="CONSOLE" />
 	</root>
 
-	<logger name="com.github.dockerjava" level="TRACE" />
+	<logger name="com.github.dockerjava" level="INFO" />
 	<logger name="org.apache" level="WARN" />
 	<logger name="org.apache.catalina.startup.DigesterFactory" level="ERROR" />
 	<logger name="org.eclipse.jetty" level="WARN" />
-	<logger name="org.kurento" level="TRACE" />
-	<logger name="org.kurento.test.Shell" level="WARN" />
 	<logger name="org.springframework" level="WARN" />
+
+	<!--
+	Use DEBUG for all of Kurento, except internal parts less interesting for tests.
+	Eg. jsonrpc introduces noise in tests that don't really focus on RPC.
+	-->
+	<logger name="org.kurento" level="DEBUG" />
+	<logger name="org.kurento.client.internal" level="INFO" />
+	<logger name="org.kurento.jsonrpc" level="INFO" />
 
 </configuration>

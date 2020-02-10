@@ -184,26 +184,13 @@ public class KurentoTest {
   
   @Before
   public void logStart() {
-      log.info("##### Start test: " + this.getClass().getSimpleName() + " -> " + name.getMethodName());
+      log.info("##### Start test: " + this.getClass().getSimpleName() + "#" + name.getMethodName());
   }
 
   @After
   public void logEnd() {
-      log.info("##### Finish test: " + this.getClass().getSimpleName() + " -> " + name.getMethodName());
+      log.info("##### Finish test: " + this.getClass().getSimpleName() + "#" + name.getMethodName());
   }
-
-  
-  // @Before
-  // public void setupKurentoTest() {
-  // logMessage("| TEST STARTING: " + getTestClassName() + "."
-  // + getTestMethodName());
-  // }
-  //
-  // @After
-  // public void teardownKurentoTest() {
-  // logMessage("| TEST FINISHED: " + getTestClassName() + "."
-  // + getTestMethodName());
-  // }
 
   public TestReport getTestReport() {
     return retry.getTestReport();

@@ -349,6 +349,7 @@ KurentoTest.prototype.updateStats = function(peerConnection, track, prefix) {
 		.getStats(track)
 		.then(function(stats) {
 			// "stats" is of type RTCStatsReport
+			// https://www.w3.org/TR/webrtc/#rtcstatsreport-object
 			// https://developer.mozilla.org/en-US/docs/Web/API/RTCStatsReport
 			// which behaves like a Map
 			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
@@ -368,7 +369,7 @@ KurentoTest.prototype.updateStats = function(peerConnection, track, prefix) {
 			});
 		})
 		.catch(function(err) {
-			console.error("Error on peerConnection.getStats(): " + err);
+			console.error(err);
 		});
 };
 

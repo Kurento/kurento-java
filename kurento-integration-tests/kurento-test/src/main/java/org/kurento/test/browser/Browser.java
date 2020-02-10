@@ -88,6 +88,7 @@ import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxDriverLogLevel;
 import org.openqa.selenium.firefox.FirefoxOptions;
 import org.openqa.selenium.ie.InternetExplorerDriver;
 import org.openqa.selenium.logging.LoggingPreferences;
@@ -190,7 +191,7 @@ public class Browser implements Closeable {
 
   public void init() {
 
-    log.debug("Starting browser {}", getId());
+    log.debug("Starting browser '{}'", getId());
 
     Class<? extends WebDriver> driverClass = browserType.getDriverClass();
 
@@ -198,7 +199,8 @@ public class Browser implements Closeable {
       DesiredCapabilities capabilities = new DesiredCapabilities();
 
       LoggingPreferences logs = new LoggingPreferences();
-      logs.enable(LogType.BROWSER, Level.INFO);
+      // logs.enable(LogType.BROWSER, Level.INFO);
+      logs.enable(LogType.BROWSER, Level.WARNING);
       capabilities.setCapability(CapabilityType.LOGGING_PREFS, logs);
 
       if (driverClass.equals(FirefoxDriver.class)) {
@@ -228,21 +230,18 @@ public class Browser implements Closeable {
       // Timeouts
       changeTimeout(timeout);
 
-      log.debug("Browser {} started", getId());
+      log.debug("Browser '{}' started", getId());
 
       calculateUrl();
 
-      log.debug("Browser {} loading url {}", getId(), url);
-
+      log.debug("Browser '{}' loading URL: '{}'...", getId(), url);
       driver.get(url.toString());
       driver.navigate().refresh();
-
-      log.debug("Browser {} initialized", getId());
+      log.debug("...done! Browser '{}' is initialized", getId());
 
     } catch (MalformedURLException e) {
       log.error("MalformedURLException in Browser.init", e);
     }
-
   }
 
   private void calculateUrl() {
@@ -258,21 +257,20 @@ public class Browser implements Closeable {
               + webPageFile.getAbsolutePath());
         }
       } else {
+        log.debug("Browser scope: '{}'", scope);
 
         String hostName;
-        log.debug("BrowserScope is {}", scope);
         if (scope == BrowserScope.DOCKER || scope == BrowserScope.ELASTEST) {
           if (docker.isRunningInContainer()) {
             hostName = docker.getContainerIpAddress();
           } else {
             hostName = docker.getHostIpForContainers();
           }
-
         } else {
           hostName = host != null ? host : node;
         }
 
-        log.debug("Protocol: {}, Hostname: {}, Port: {}, Web page type: {}", protocol, hostName,
+        log.debug("URL protocol: '{}', host: '{}', port: {}, web page type: '{}'", protocol, hostName,
             serverPort, webPageType);
 
         try {
@@ -384,7 +382,13 @@ public class Browser implements Closeable {
     if (scope == BrowserScope.LOCAL) {
       WebDriverManager.firefoxdriver().setup();
     }
+
     FirefoxOptions firefoxOptions = new FirefoxOptions();
+    firefoxOptions.setLogLevel(FirefoxDriverLogLevel.INFO);
+
+    //firefoxOptions.addPreference("logging.config.add_timestamp", true);
+    //firefoxOptions.addPreference("logging.MediaTrackGraph", 5);
+
     // This flag avoids granting the access to the camera
     firefoxOptions.addPreference("media.navigator.permission.disabled", true);
 
@@ -435,7 +439,7 @@ public class Browser implements Closeable {
   private void createDriver(DesiredCapabilities capabilities, Object options)
       throws MalformedURLException {
 
-    log.debug("Creating driver in scope {} for browser '{}'", scope, id);
+    log.debug("Creating driver in scope '{}' for browser '{}'", scope, id);
 
     if (scope == BrowserScope.SAUCELABS) {
       createSaucelabsDriver(capabilities);

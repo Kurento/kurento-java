@@ -52,7 +52,7 @@ public class Shell {
   }
 
   public static Process run(final boolean redirectOutputs, final String... command) {
-    log.trace("Running command on the shell: {}", Arrays.toString(command));
+    log.debug("Run command: {}", Arrays.toString(command));
 
     try {
       final ProcessBuilder p = new ProcessBuilder(command);
@@ -80,11 +80,9 @@ public class Shell {
   }
 
   public static ProcessResult runAndWaitArray(final String[] command) {
-    log.trace("Running command on the shell: {}", Arrays.toString(command));
+    log.debug("Run and wait for command: {}", Arrays.toString(command));
     final ProcessResult result = runAndWaitNoLog(command);
-
-    log.trace("Command output:" + result.output);
-    log.trace("Command exit code:" + result.exitCode);
+    log.debug("Command exit code: {}, output: '{}'", result.exitCode, result.output);
 
     return result;
   }
@@ -105,7 +103,7 @@ public class Shell {
           "Exception executing command on the shell: " + Arrays.toString(command), e);
     }
 
-    return new ProcessResult(output, exitCode);
+    return new ProcessResult(output.trim(), exitCode);
   }
 
 }

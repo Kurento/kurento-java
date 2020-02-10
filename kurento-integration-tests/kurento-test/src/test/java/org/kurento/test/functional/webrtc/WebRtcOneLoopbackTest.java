@@ -84,11 +84,14 @@ public class WebRtcOneLoopbackTest extends FunctionalTest {
     webRtcEndpoint.connect(webRtcEndpoint);
 
     final CountDownLatch flowingLatch = new CountDownLatch(1);
+
     webRtcEndpoint
         .addMediaFlowInStateChangeListener(new EventListener<MediaFlowInStateChangeEvent>() {
-
           @Override
           public void onEvent(MediaFlowInStateChangeEvent event) {
+            log.debug(
+                "[Kms.WebRtcEndpoint.MediaFlowInStateChange] -> endpoint: {}, mediaType: {}, state: {}",
+                webRtcEndpoint.getId(), event.getMediaType(), event.getState());
             if (event.getState().equals(MediaFlowState.FLOWING)) {
               flowingLatch.countDown();
             }

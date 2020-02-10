@@ -218,7 +218,8 @@ public class KmsService extends TestService {
 
     // Assertion: if local or Dockerized KMS, port should be available
     if (!isKmsRemote && !isFreePort(wsUri)) {
-      throw new KurentoException("KMS cannot be started in URI: " + wsUri + ". Port is not free");
+      throw new KurentoException(
+          "KMS cannot be started in URI '" + wsUri + "': port is not available");
     }
 
     if (isKmsDocker || isKmsElastest) {
@@ -229,7 +230,7 @@ public class KmsService extends TestService {
             + "-" + KurentoTest.getTestClassName() + "-" + +new Random().nextInt(3000));
       }
     } else {
-      log.debug("Starting KMS with URI: {}", wsUri);
+      log.debug("Starting KMS with URI '{}'", wsUri);
 
       try {
         workspace = Files.createTempDirectory("kurento-test");
@@ -392,7 +393,7 @@ public class KmsService extends TestService {
     String kmsLogPath = getKmsLogPath();
     if (isKmsRemote) {
       remoteKmsSshConnection.runAndWaitCommand("sh", "-c", kmsLogPath + "kurento.sh > /dev/null");
-      log.debug("Remote KMS started in URI {}", wsUri);
+      log.debug("Remote KMS started in URI '{}'", wsUri);
 
     } else if (isKmsDocker || isKmsElastest) {
         if(isKmsElastest) {
@@ -401,7 +402,7 @@ public class KmsService extends TestService {
       startDockerizedKms();
     } else {
       Shell.run("sh", "-c", kmsLogPath + "kurento.sh");
-      log.debug("Local KMS started in URI {}", wsUri);
+      log.debug("Local KMS started in URI '{}'", wsUri);
     }
 
     isKmsStarted = true;
@@ -432,7 +433,7 @@ public class KmsService extends TestService {
 
       for (int i = 0; i < retries; i++) {
         try {
-          log.debug("({}) Wait for KMS: {}. Container: {}", i, wsUri, container);
+          log.debug("({}) Wait for KMS '{}', container '{}'", i, wsUri, container);
           Session wsSession = container.connectToServer(new WebSocketClient(),
               ClientEndpointConfig.Builder.create().build(), new URI(wsUri));
           wsSession.close();
@@ -443,7 +444,7 @@ public class KmsService extends TestService {
           return;
         } catch (DeploymentException | IOException | URISyntaxException e) {
           try {
-            log.warn("Exception while waiting for KMS: {}. {}", wsUri, e.getMessage());
+            log.warn("Exception while waiting for KMS '{}': {}", wsUri, e.getMessage());
             Thread.sleep(waitTime);
           } catch (InterruptedException e1) {
             e1.printStackTrace();
@@ -458,7 +459,7 @@ public class KmsService extends TestService {
       try {
         Thread.sleep(1000);
       } catch (InterruptedException e) {
-        log.error("InterruptedException {}", e.getMessage());
+        log.error("InterruptedException: {}", e.getMessage());
       }
     }
   }
@@ -467,6 +468,7 @@ public class KmsService extends TestService {
     Docker dockerClient = Docker.getSingleton();
     String kmsImageName = getProperty(KMS_DOCKER_IMAGE_NAME_PROP, KMS_DOCKER_IMAGE_NAME_DEFAULT);
 
+    log.debug("Starting KMS container '{}'", dockerContainerName);
     boolean forcePulling =
         getProperty(KMS_DOCKER_IMAGE_FORCE_PULLING_PROP, KMS_DOCKER_IMAGE_FORCE_PULLING_DEFAULT);
 
@@ -475,8 +477,6 @@ public class KmsService extends TestService {
       dockerClient.pullImageIfNecessary(kmsImageName, true);
       log.debug("KMS image {} pulled", kmsImageName);
     }
-
-    log.debug("Starting KMS container...{}", dockerContainerName);
 
     // Check S3 properties
     String s3BucketName = getProperty(KMS_DOCKER_S3_BUCKET_NAME);
@@ -506,11 +506,10 @@ public class KmsService extends TestService {
 
     if (kmsDnat && seleniumDnat && RELAY.toString().toUpperCase().equals(kmsCandidateType)
         && SRFLX.toString().toUpperCase().equals(seleniumCandidateType)) {
-      // Use Turn for KMS
       String kmsTurnIp = getProperty(TEST_ICE_SERVER_URL_PROPERTY);
-      log.debug("Turn Server {}", kmsTurnIp);
-      createContainerCmd =
-          dockerClient.getClient().createContainerCmd(kmsImageName).withName(dockerContainerName)
+      log.debug("Use TURN for KMS: '{}'", kmsTurnIp);
+      createContainerCmd = dockerClient.getClient().createContainerCmd(kmsImageName)
+          .withName(dockerContainerName)
           .withEnv("GST_DEBUG=" + getDebugOptions(), "S3_ACCESS_BUCKET_NAME=" + s3BucketName,
               "S3_ACCESS_KEY_ID=" + s3AccessKeyId, "S3_SECRET_ACCESS_KEY=" + s3SecretAccessKey,
               "S3_HOSTNAME=" + s3Hostname, "KMS_TURN_URL=" + kmsTurnIp,
@@ -532,10 +531,10 @@ public class KmsService extends TestService {
         kmsStunPort = "";
       }
 
-      log.debug("Stun Server {}:{}", kmsStunIp, kmsStunPort);
+      log.debug("Use STUN for KMS, IP address: '{}', port: '{}'", kmsStunIp, kmsStunPort);
 
-      createContainerCmd =
-          dockerClient.getClient().createContainerCmd(kmsImageName).withName(dockerContainerName)
+      createContainerCmd = dockerClient.getClient().createContainerCmd(kmsImageName)
+          .withName(dockerContainerName)
           .withEnv("GST_DEBUG=" + getDebugOptions(), "S3_ACCESS_BUCKET_NAME=" + s3BucketName,
               "S3_ACCESS_KEY_ID=" + s3AccessKeyId, "S3_SECRET_ACCESS_KEY=" + s3SecretAccessKey,
               "S3_HOSTNAME=" + s3Hostname, "KMS_STUN_IP=" + kmsStunIp,
@@ -554,8 +553,8 @@ public class KmsService extends TestService {
     } else {
       String testFilesPath = KurentoTest.getTestFilesDiskPath();
       Volume volume = new Volume(testFilesPath);
-      String targetPath =
-          Paths.get(KurentoTest.getDefaultOutputFolder().toURI()).toAbsolutePath().toString();
+      String targetPath = Paths.get(KurentoTest.getDefaultOutputFolder().toURI()).toAbsolutePath()
+          .toString();
       Volume volumeTest = new Volume(targetPath);
       createContainerCmd.withVolumes(volume, volumeTest).withBinds(
           new Bind(testFilesPath, volume, AccessMode.ro),
@@ -581,14 +580,13 @@ public class KmsService extends TestService {
     } else {
       CreateContainerResponse kmsContainer = createContainerCmd.exec();
       dockerClient.getClient().startContainerCmd(kmsContainer.getId()).exec();
-      kmsAddress =
-          dockerClient.inspectContainer(dockerContainerName).getNetworkSettings()
+      kmsAddress = dockerClient.inspectContainer(dockerContainerName).getNetworkSettings()
               .getNetworks().values().iterator().next().getIpAddress();
     }
 
     setWsUri("ws://" + kmsAddress + ":8888/kurento");
 
-    log.debug("Dockerized KMS started in URI {}", wsUri);
+    log.debug("Dockerized KMS started in URI '{}'", this.wsUri);
   }
 
   public String getKmsLogPath() {

@@ -89,6 +89,7 @@ public class BaseRecorder extends FunctionalTest {
     playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
       @Override
       public void onEvent(EndOfStreamEvent event) {
+        log.debug("[Kms.PlayerEndpoint.EndOfStream] Event received");
         eosLatch.countDown();
       }
     });
@@ -157,7 +158,6 @@ public class BaseRecorder extends FunctionalTest {
         Assert.assertTrue("Check audio. There were more than 2 seconds without receiving packets",
             errorContinuityAudiolatch.getCount() == 1);
       }
-
     }
   }
 
@@ -258,6 +258,7 @@ public class BaseRecorder extends FunctionalTest {
     playerEp.addEndOfStreamListener(new EventListener<EndOfStreamEvent>() {
       @Override
       public void onEvent(EndOfStreamEvent event) {
+        log.debug("[Kms.PlayerEndpoint.EndOfStream] Event received");
         eosLatch.countDown();
       }
     });

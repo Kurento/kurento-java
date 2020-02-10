@@ -217,9 +217,11 @@ public class PipelineStabilityConnectDisconnectWebRtcAndPassthroughOneToManyPara
         final CountDownLatch flowingLatch = new CountDownLatch(1);
         webRtcRoot
             .addMediaFlowOutStateChangeListener(new EventListener<MediaFlowOutStateChangeEvent>() {
-
               @Override
               public void onEvent(MediaFlowOutStateChangeEvent event) {
+                log.debug(
+                    "[Kms.WebRtcEndpoint.MediaFlowOutStateChange] -> endpoint: {}, mediaType: {}, state: {}",
+                    webRtcRoot.getId(), event.getMediaType(), event.getState());
                 if (event.getState().equals(MediaFlowState.FLOWING)) {
                   flowingLatch.countDown();
                 }
