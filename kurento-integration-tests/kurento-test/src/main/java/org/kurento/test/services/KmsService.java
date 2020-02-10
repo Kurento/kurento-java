@@ -347,8 +347,8 @@ public class KmsService extends TestService {
       return false;
     }
 
-    Shell.ProcessResult result = Shell.runAndWaitResult("netcat", "-z", wsUrl.getHost(),
-        String.valueOf(wsUrl.getPort()));
+    Shell.ProcessResult result = Shell.runAndWaitResult("netcat", "-z", "-w", "3",
+        wsUrl.getHost(), String.valueOf(wsUrl.getPort()));
 
     if (result.exitCode == 1) {
       // If netcat returns 1, it means that the port is not in use
