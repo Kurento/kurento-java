@@ -90,7 +90,6 @@ public class WebRtcQualityLoopbackTest extends QualityTest {
     return Arrays.asList(new Object[][] { { test } });
   }
 
-  @Ignore
   @Test
   public void testWebRtcQualityLoopback() throws InterruptedException {
     doTest(BrowserType.CHROME, getTestFilesDiskPath() + "/video/10sec/red.y4m",
