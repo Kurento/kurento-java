@@ -171,12 +171,18 @@ public class WebRtcTestPage extends WebPage {
   }
 
   public int getPeerConnAudioPacketsRecv(PeerConnectionStats stats) {
-    String val = (String) stats.getStats().get("audio_peerconnection_inbound_packetsReceived");
-    return Integer.parseInt(val);
+    String val = (String) stats.getStats()
+        .getOrDefault("audio_peerconnection_inbound_packetsReceived", "0");
+    int ret = 0;
+    try {
+      ret = Integer.parseInt(val);
+    } catch (NumberFormatException e) {
+    }
+    return ret;
   }
 
   public long getPeerConnAudioInboundTimestamp(PeerConnectionStats stats) {
-    Long val = (Long) stats.getStats().get("audio_peerconnection_inbound_timestamp");
+    Long val = (Long) stats.getStats().getOrDefault("audio_peerconnection_inbound_timestamp", 0L);
     return val;
   }
 
