@@ -66,19 +66,23 @@ public class RepositoryMongoTest extends KurentoClientBrowserTest<WebRtcTestPage
       return servletRegistrationBean;
     }
 
-    @Bean
-    public RepositoryApiConfiguration repositoryApiConfiguration() throws UnknownHostException {
-      log.debug("Repository for playing test");
-      RepositoryApiConfiguration config = new RepositoryApiConfiguration();
-      config.setWebappPublicUrl("http://" + InetAddress.getLocalHost().getHostAddress() + ":"
-          + WebServerService.getAppHttpPort() + "/");
-      config.setMongoDatabaseName("testfiles");
-      String mongoUrlConnection = Protocol.MONGODB + "://" + getTestFilesMongoPath();
-      log.debug("Using MongoDB URL connection {}", mongoUrlConnection);
-      config.setMongoUrlConnection(mongoUrlConnection);
-      config.setRepositoryType(RepoType.MONGODB);
-      return config;
-    }
+    // Comment out this bean, to disable connection configuration to MongoDB.
+    // If at some point the Kurento project decides to recover the Repository,
+    // then we might be able to restore all the MongoDB functionality.
+    //
+    // @Bean
+    // public RepositoryApiConfiguration repositoryApiConfiguration() throws UnknownHostException {
+    //   log.debug("Repository for playing test");
+    //   RepositoryApiConfiguration config = new RepositoryApiConfiguration();
+    //   config.setWebappPublicUrl("http://" + InetAddress.getLocalHost().getHostAddress() + ":"
+    //       + WebServerService.getAppHttpPort() + "/");
+    //   config.setMongoDatabaseName("testfiles");
+    //   String mongoUrlConnection = Protocol.MONGODB + "://" + getTestFilesMongoPath();
+    //   log.debug("Using MongoDB URL connection {}", mongoUrlConnection);
+    //   config.setMongoUrlConnection(mongoUrlConnection);
+    //   config.setRepositoryType(RepoType.MONGODB);
+    //   return config;
+    // }
   }
 
   public Repository repository;
@@ -102,11 +106,17 @@ public class RepositoryMongoTest extends KurentoClientBrowserTest<WebRtcTestPage
         mediaUrl = S3 + "://" + getTestFilesS3Path();
         break;
       case MONGODB:
-        List<RepositoryItem> repositoryItem =
-            repository.findRepositoryItemsByAttRegex("file", nameMedia);
-        RepositoryHttpPlayer repositoryPlayer = repositoryItem.get(0).createRepositoryHttpPlayer();
-        mediaUrl = repositoryPlayer.getURL();
-        return mediaUrl;
+        // See above to read about commenting out the MongoDB code.
+        // In its place, we return the same configuration that is used for FILE.
+        //
+        // List<RepositoryItem> repositoryItem =
+        //     repository.findRepositoryItemsByAttRegex("file", nameMedia);
+        // RepositoryHttpPlayer repositoryPlayer = repositoryItem.get(0).createRepositoryHttpPlayer();
+        // mediaUrl = repositoryPlayer.getURL();
+        // return mediaUrl;
+        //
+        mediaUrl = FILE + "://" + getTestFilesDiskPath();
+        break;
       default:
         throw new RuntimeException(protocol + "is not supported in this test.");
     }
