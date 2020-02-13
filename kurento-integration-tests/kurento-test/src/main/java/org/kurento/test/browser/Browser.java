@@ -169,7 +169,7 @@ public class Browser implements Closeable {
     this.recordAudio = builder.recordAudio;
     this.audioSampleRate = builder.audioSampleRate;
     this.audioChannel = builder.audioChannel;
-    this.browserVersion = getProperty("test.browser.version", builder.browserVersion);
+    this.initBrowserVersion();
     this.platform = builder.platform;
     this.timeout = builder.timeout;
     this.colorDistance = builder.colorDistance;
@@ -187,6 +187,33 @@ public class Browser implements Closeable {
     this.extensions = builder.extensions;
     this.url = builder.url;
     this.webPagePath = builder.webPagePath;
+  }
+  
+  public void initBrowserVersion() {
+      this.browserVersion = getProperty("test.browser.version", builder.browserVersion);
+
+      if (this.browserType != null) {
+          String version = null;
+          switch (this.browserType) {
+          case CHROME:
+              version = getProperty("test.browser.chrome.version");
+              break;
+          case FIREFOX:
+              version = getProperty("test.browser.firefox.version");
+              break;
+          case IEXPLORER:
+              version = getProperty("test.browser.iexplorer.version");
+              break;
+          case SAFARI:
+              version = getProperty("test.browser.safari.version");
+              break;
+          default:
+          }
+
+          if (version != null && !version.isEmpty()) {
+              this.browserVersion = version;
+          }
+      }
   }
 
   public void init() {
