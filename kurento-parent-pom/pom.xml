@@ -173,8 +173,8 @@
 		<version.shade.plugin>3.2.1</version.shade.plugin>
 		<version.sonar.plugin>3.6.0.1398</version.sonar.plugin>
 		<version.source.plugin>3.1.0</version.source.plugin>
-		<version.surefire.plugin>3.0.0-M3</version.surefire.plugin>
-		<version.failsafe.plugin>3.0.0-M3</version.failsafe.plugin>
+		<version.surefire.plugin>3.0.0-M4</version.surefire.plugin>
+		<version.failsafe.plugin>3.0.0-M4</version.failsafe.plugin>
 		<version.wagon.ssh.plugin>3.3.2</version.wagon.ssh.plugin>
 		<version.wagon.s3.plugin>1.2.1</version.wagon.s3.plugin>
 		<version.war.plugin>3.2.3</version.war.plugin>
