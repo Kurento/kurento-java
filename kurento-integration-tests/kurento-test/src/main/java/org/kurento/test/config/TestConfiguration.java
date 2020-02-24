@@ -228,13 +228,9 @@ public class TestConfiguration {
   public static final String TEST_RECORD_URL_PROP = "test.record.url";
   public static final String TEST_RECORD_DEFAULTPATH_PROP = "test.record.defaultpath";
 
-  // FIXME: When CI can, remove TEST_FILES_DISK_PROP_OLD
-  public static final String TEST_FILES_DISK_PROP_OLD = "test.files";
   public static final String TEST_FILES_DISK_PROP = "test.files.disk";
   public static final String TEST_FILES_DISK_DEFAULT = "/var/lib/jenkins/test-files";
 
-  // FIXME: When CI can, remove TEST_FILES_S3_PROP_OLD
-  public static final String TEST_FILES_S3_PROP_OLD = "test.s3";
   public static final String TEST_FILES_S3_PROP = "test.files.s3";
   public static final String TEST_FILES_S3_DEFAULT = "kurento-s3-test";
 

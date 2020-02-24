@@ -25,14 +25,12 @@ import static org.kurento.test.config.TestConfiguration.KMS_STUN_PORT_PROPERTY;
 import static org.kurento.test.config.TestConfiguration.TEST_CONFIG_FILE_DEFAULT;
 import static org.kurento.test.config.TestConfiguration.TEST_FILES_DISK_DEFAULT;
 import static org.kurento.test.config.TestConfiguration.TEST_FILES_DISK_PROP;
-import static org.kurento.test.config.TestConfiguration.TEST_FILES_DISK_PROP_OLD;
 import static org.kurento.test.config.TestConfiguration.TEST_FILES_HTTP_DEFAULT;
 import static org.kurento.test.config.TestConfiguration.TEST_FILES_HTTP_PROP;
 import static org.kurento.test.config.TestConfiguration.TEST_FILES_MONGO_DEFAULT;
 import static org.kurento.test.config.TestConfiguration.TEST_FILES_MONGO_PROP;
 import static org.kurento.test.config.TestConfiguration.TEST_FILES_S3_DEFAULT;
 import static org.kurento.test.config.TestConfiguration.TEST_FILES_S3_PROP;
-import static org.kurento.test.config.TestConfiguration.TEST_FILES_S3_PROP_OLD;
 import static org.kurento.test.config.TestConfiguration.TEST_FILES_URL_PROP;
 import static org.kurento.test.config.TestConfiguration.TEST_ICE_SERVER_CREDENTIAL_PROPERTY;
 import static org.kurento.test.config.TestConfiguration.TEST_ICE_SERVER_URL_PROPERTY;
@@ -313,19 +311,11 @@ public class KurentoTest {
   }
 
   public static String getTestFilesDiskPath() {
-    String testFilesDisk = getProperty(TEST_FILES_DISK_PROP);
-    if (testFilesDisk == null) {
-      testFilesDisk = getProperty(TEST_FILES_DISK_PROP_OLD, TEST_FILES_DISK_DEFAULT);
-    }
-    return testFilesDisk;
+    return getProperty(TEST_FILES_DISK_PROP, TEST_FILES_DISK_DEFAULT);
   }
 
   public static String getTestFilesS3Path() {
-    String testFilesS3 = getProperty(TEST_FILES_S3_PROP);
-    if (testFilesS3 == null) {
-      testFilesS3 = getProperty(TEST_FILES_S3_PROP_OLD, TEST_FILES_S3_DEFAULT);
-    }
-    return testFilesS3;
+    return getProperty(TEST_FILES_S3_PROP, TEST_FILES_S3_DEFAULT);
   }
 
   public static String getTestFilesHttpPath() {
