@@ -20,7 +20,7 @@ package org.kurento.test.config;
 import static org.kurento.commons.PropertiesManager.getProperty;
 import static org.kurento.test.config.TestConfiguration.TEST_CONFIG_EXECUTIONS_DEFAULT;
 import static org.kurento.test.config.TestConfiguration.TEST_CONFIG_EXECUTIONS_PROPERTY;
-import static org.kurento.test.config.TestConfiguration.TEST_CONFIG_FILE_DEFAULT;
+import static org.kurento.test.config.TestConfiguration.TEST_CONFIG_FILE_PROPERTY;
 
 import java.io.BufferedReader;
 import java.net.URL;
@@ -142,7 +142,7 @@ public class TestScenario {
   }
 
   private static String getConfigFile() {
-    return getProperty(TEST_CONFIG_FILE_DEFAULT);
+    return getProperty(TEST_CONFIG_FILE_PROPERTY);
   }
 
   public static Collection<Object[]> from(String defaultBrowserConfigFile) {

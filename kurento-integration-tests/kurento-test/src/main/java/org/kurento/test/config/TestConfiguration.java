@@ -48,8 +48,9 @@ public class TestConfiguration {
 
   public static final String TEST_DURATION_PROPERTY = "test.duration";
 
-  public static final String TEST_CONFIG_FILE_DEFAULT = "test.config.file";
-  public static final String TEST_CONFIG_JSON_DEFAULT = "test.conf.json";
+  public static final String TEST_CONFIG_FILE_PROPERTY = "test.config.file";
+  public static final String TEST_CONFIG_FILE_DEFAULT = "test.conf.json";
+
   public static final String TEST_CONFIG_EXECUTIONS_PROPERTY = "test.config.executions";
   public static final String TEST_CONFIG_EXECUTIONS_DEFAULT = "executions";
 

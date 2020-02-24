@@ -22,7 +22,7 @@ import static org.kurento.test.config.Protocol.FILE;
 import static org.kurento.test.config.Protocol.HTTP;
 import static org.kurento.test.config.TestConfiguration.KMS_STUN_IP_PROPERTY;
 import static org.kurento.test.config.TestConfiguration.KMS_STUN_PORT_PROPERTY;
-import static org.kurento.test.config.TestConfiguration.TEST_CONFIG_JSON_DEFAULT;
+import static org.kurento.test.config.TestConfiguration.TEST_CONFIG_FILE_DEFAULT;
 import static org.kurento.test.config.TestConfiguration.TEST_FILES_DISK_DEFAULT;
 import static org.kurento.test.config.TestConfiguration.TEST_FILES_DISK_PROP;
 import static org.kurento.test.config.TestConfiguration.TEST_FILES_DISK_PROP_OLD;
@@ -121,7 +121,7 @@ public class KurentoTest {
   public static final String SEPARATOR = "+" + StringUtils.repeat("-", 70);
 
   static {
-    ConfigFileManager.loadConfigFile(TEST_CONFIG_JSON_DEFAULT);
+    ConfigFileManager.loadConfigFile(TEST_CONFIG_FILE_DEFAULT);
   }
 
   public KurentoTest() {
