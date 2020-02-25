@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.InetAddress;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -36,6 +37,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -640,15 +642,13 @@ public class Docker implements Closeable {
 
   public String getHostIpForContainers() {
     try {
-      Enumeration<NetworkInterface> b = NetworkInterface.getNetworkInterfaces();
-      while (b.hasMoreElements()) {
-        NetworkInterface iface = b.nextElement();
-        if (iface.getName().contains("docker")) {
-          for (InterfaceAddress f : iface.getInterfaceAddresses()) {
-            if (f.getAddress().isSiteLocalAddress()) {
-              String addr = f.getAddress().toString();
-              log.debug("Host IP for container is {}", addr);
-              return addr;
+      Enumeration<NetworkInterface> nets = NetworkInterface.getNetworkInterfaces();
+      for (NetworkInterface netint : Collections.list(nets)) {
+        if (netint.getName().contains("docker")) {
+          Enumeration<InetAddress> inetAddresses = netint.getInetAddresses();
+          for (InetAddress inetAddress : Collections.list(inetAddresses)) {
+            if (inetAddress.isSiteLocalAddress()) {
+              return inetAddress.getHostAddress();
             }
           }
         }
