@@ -31,12 +31,12 @@ import static org.kurento.test.config.TestConfiguration.TEST_FILES_MONGO_DEFAULT
 import static org.kurento.test.config.TestConfiguration.TEST_FILES_MONGO_PROP;
 import static org.kurento.test.config.TestConfiguration.TEST_FILES_S3_DEFAULT;
 import static org.kurento.test.config.TestConfiguration.TEST_FILES_S3_PROP;
-import static org.kurento.test.config.TestConfiguration.TEST_FILES_URL_PROP;
 import static org.kurento.test.config.TestConfiguration.TEST_ICE_SERVER_CREDENTIAL_PROPERTY;
 import static org.kurento.test.config.TestConfiguration.TEST_ICE_SERVER_URL_PROPERTY;
 import static org.kurento.test.config.TestConfiguration.TEST_ICE_SERVER_USERNAME_PROPERTY;
 import static org.kurento.test.config.TestConfiguration.TEST_NUMRETRIES_PROPERTY;
 import static org.kurento.test.config.TestConfiguration.TEST_NUM_NUMRETRIES_DEFAULT;
+import static org.kurento.test.config.TestConfiguration.TEST_PLAYER_URL_PROP;
 import static org.kurento.test.config.TestConfiguration.TEST_PRINT_LOG_DEFAULT;
 import static org.kurento.test.config.TestConfiguration.TEST_PRINT_LOG_PROP;
 import static org.kurento.test.config.TestConfiguration.TEST_PROJECT_PATH_DEFAULT;
@@ -241,7 +241,7 @@ public class KurentoTest {
   }
 
   public static String getPlayerUrl(String mediaName) {
-    String playerUrl = getProperty(TEST_FILES_URL_PROP);
+    String playerUrl = getProperty(TEST_PLAYER_URL_PROP);
     if (playerUrl == null) {
       return HTTP + "://" + getTestFilesHttpPath() + mediaName;
     }

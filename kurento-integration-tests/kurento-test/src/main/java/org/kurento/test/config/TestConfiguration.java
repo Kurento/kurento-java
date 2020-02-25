@@ -224,9 +224,10 @@ public class TestConfiguration {
   public static final String TEST_PRINT_LOG_PROP = "test.print.log";
   public static final boolean TEST_PRINT_LOG_DEFAULT = true;
 
-  public static final String TEST_FILES_URL_PROP = "test.files.url";
   public static final String TEST_RECORD_URL_PROP = "test.record.url";
   public static final String TEST_RECORD_DEFAULTPATH_PROP = "test.record.defaultpath";
+
+  public static final String TEST_PLAYER_URL_PROP = "test.player.url";
 
   public static final String TEST_FILES_DISK_PROP = "test.files.disk";
   public static final String TEST_FILES_DISK_DEFAULT = "/var/lib/jenkins/test-files";
