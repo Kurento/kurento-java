@@ -22,10 +22,10 @@ public class CheckAudioTimerTask extends TimerTask {
   private final CountDownLatch errorContinuityAudiolatch;
   private final WebRtcTestPage page;
   private long lastPacketsReceived = 0;
-  private long lastTimestamp = 0;
+  private double lastTimestamp = 0.0;
   private long currentPacketsReceived = 0;
-  private long currentTimestamp = 0;
-  private long diffTimestamp = 0;
+  private double currentTimestamp = 0.0;
+  private double diffTimestamp = 0.0;
   private int count = 0;
   private double packetsNoReceived = 0;
 
@@ -48,12 +48,12 @@ public class CheckAudioTimerTask extends TimerTask {
     diffTimestamp = currentTimestamp - lastTimestamp;
     count++;
 
-    if (lastTimestamp != 0) {
-      log.debug("Total audio packets received:{} in {} ms",
+    if (lastTimestamp > 0.0) {
+      log.debug("Total audio packets received: {} in {} ms",
           (currentPacketsReceived - lastPacketsReceived), diffTimestamp);
     }
 
-    if (((currentPacketsReceived - lastPacketsReceived) == 0) && (lastTimestamp != 0)) {
+    if (((currentPacketsReceived - lastPacketsReceived) == 0) && (lastTimestamp > 0.0)) {
       // Packets that must be received in (currentTimestamp - lastTimestamp)
       // Assume that 50 packets/second are received
       double packetsMustReceive = (diffTimestamp * 50.0) / 1000.0;

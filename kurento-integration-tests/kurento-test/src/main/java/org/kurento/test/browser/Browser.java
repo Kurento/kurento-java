@@ -740,7 +740,7 @@ public class Browser implements Closeable {
       try {
         File pageFile =
             new File(this.getClass().getClassLoader().getResource(kurentoTestPath).getFile());
-        kurentoTestJsContent = new String(Files.readAllBytes(pageFile.toPath()));
+        kurentoTestJsContent = new String(Files.readAllBytes(pageFile.toPath())).trim();
       } catch (NoSuchFileException nsfe) {
         InputStream inputStream =
             this.getClass().getClassLoader().getResourceAsStream(kurentoTestPath);

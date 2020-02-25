@@ -50,8 +50,8 @@ function KurentoTest() {
 
 	// RTC statistics parameters
 	this.rtcStats = {};
-	this.rtcStatsRate = 100; // milliseconds
-	this.rtcStatsIntervalId = {};
+	this.rtcStatsInterval = 100; // milliseconds
+	this.rtcStatsIntervalIds = {};
 
 	// Initial time
 	this.initTime = new Date();
@@ -291,64 +291,112 @@ KurentoTest.prototype.colorChanged = function(expectedColor, realColor) {
 	}
 }
 
-KurentoTest.prototype.activateOutboundRtcStats = function(peerConnection) {
-	this.activateRtcStats(peerConnection, "getLocalStreams", "_outbound_");
-}
+KurentoTest.prototype.activateOutboundRtcStats = function(
+	peerConnectionVarName
+) {
+	this.activateRtcStats(peerConnectionVarName, "getLocalStreams", "_outbound_");
+};
 
-KurentoTest.prototype.activateInboundRtcStats = function(peerConnection) {
-	this.activateRtcStats(peerConnection, "getRemoteStreams", "_inbound_");
-}
+KurentoTest.prototype.activateInboundRtcStats = function(
+	peerConnectionVarName
+) {
+	this.activateRtcStats(peerConnectionVarName, "getRemoteStreams", "_inbound_");
+};
 
-KurentoTest.prototype.activateRtcStats = function(peerConnection,
-		streamFunction, suffix) {
-	var rate = this.rtcStatsRate;
-	if (arguments.length) {
-		rate = arguments[0];
+KurentoTest.prototype.activateRtcStats = function(
+	peerConnectionVarName,
+	functionName,
+	suffix
+) {
+	const rtcStatsName = "" + peerConnectionVarName + functionName + suffix;
+	kurentoTest.rtcStatsIntervalIds[rtcStatsName] = setInterval(
+		this.updateRtcStats,
+		this.rtcStatsInterval,
+		eval(peerConnectionVarName),
+		functionName,
+		suffix
+	);
+};
+
+KurentoTest.prototype.updateRtcStats = function(
+	peerConnection,
+	streamFnName,
+	suffix
+) {
+	eval("var pcStream = peerConnection." + streamFnName + "()[0];");
+
+	const audioTrack = pcStream.getAudioTracks()[0];
+	if (!!audioTrack) {
+		kurentoTest.updateStats(
+			peerConnection,
+			audioTrack,
+			"audio_peerconnection" + suffix
+		);
 	}
-	kurentoTest.rtcStatsIntervalId[peerConnection + streamFunction + suffix] = setInterval(
-			this.updateRtcStats, rate, eval(peerConnection), streamFunction,
-			suffix);
-}
 
-KurentoTest.prototype.updateRtcStats = function(peerConnection, streamFunction,
-		suffix) {
-	eval("var remoteStream = peerConnection." + streamFunction + "()[0];");
-	var videoTrack = remoteStream.getVideoTracks()[0];
-	var audioTrack = remoteStream.getAudioTracks()[0];
+	const videoTrack = pcStream.getVideoTracks()[0];
+	if (!!videoTrack) {
+		kurentoTest.updateStats(
+			peerConnection,
+			videoTrack,
+			"video_peerconnection" + suffix
+		);
+	}
+};
 
-	kurentoTest.updateStats(peerConnection, videoTrack, "video_peerconnection"
-			+ suffix);
-	kurentoTest.updateStats(peerConnection, audioTrack, "audio_peerconnection"
-			+ suffix);
-}
-
-KurentoTest.prototype.updateStats = function(peerConnection, track, type) {
-	peerConnection.getStats(function(stats) {
-		var result = stats.result()[2];
-		if (result) {
-			kurentoTest.rtcStats[type + "timestamp"] = result.timestamp
-					.getTime();
-			result.names().forEach(function(name) {
-				kurentoTest.rtcStats[type + name] = result.stat(name);
+KurentoTest.prototype.updateStats = function(peerConnection, track, prefix) {
+	peerConnection
+		.getStats(track)
+		.then(function(stats) {
+			// "stats" is of type RTCStatsReport
+			// https://developer.mozilla.org/en-US/docs/Web/API/RTCStatsReport
+			// which behaves like a Map
+			// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Map
+			stats.forEach(report => {
+				// "report.type" is of type RTCStatsType
+				// https://developer.mozilla.org/en-US/docs/Web/API/RTCStatsType
+				if (report.type === "inbound-rtp" || report.type === "outbound-rtp") {
+					Object.keys(report).forEach(statName => {
+						if (statName !== "type" && statName !== "id") {
+							// Not filtering out the "timestamp" field, because
+							// it should be included in the rtcStats
+							const fullStatName = prefix + statName;
+							kurentoTest.rtcStats[fullStatName] = report[statName];
+						}
+					});
+				}
 			});
-		}
-	}, track);
-}
+		})
+		.catch(function(err) {
+			console.error("Error on peerConnection.getStats(): " + err);
+		});
+};
 
-KurentoTest.prototype.stopOutboundRtcStats = function(peerConnection) {
-	this.clearRtcStatsInterval(peerConnection, "getLocalStreams", "_outbound_");
-}
+KurentoTest.prototype.stopOutboundRtcStats = function(peerConnectionVarName) {
+	this.clearRtcStatsInterval(
+		peerConnectionVarName,
+		"getLocalStreams",
+		"_outbound_"
+	);
+};
 
-KurentoTest.prototype.stopInboundRtcStats = function(peerConnection) {
-	this.clearRtcStatsInterval(peerConnection, "getRemoteStreams", "_inbound_");
-}
+KurentoTest.prototype.stopInboundRtcStats = function(peerConnectionVarName) {
+	this.clearRtcStatsInterval(
+		peerConnectionVarName,
+		"getRemoteStreams",
+		"_inbound_"
+	);
+};
 
-KurentoTest.prototype.clearRtcStatsInterval = function(peerConnection,
-		streamFunction, suffix) {
-	clearInterval(kurentoTest.rtcStatsIntervalId[peerConnection
-			+ streamFunction + suffix]);
+KurentoTest.prototype.clearRtcStatsInterval = function(
+	peerConnectionVarName,
+	functionName,
+	suffix
+) {
+	const rtcStatsName = "" + peerConnectionVarName + functionName + suffix;
+	clearInterval(kurentoTest.rtcStatsIntervalIds[rtcStatsName]);
 	this.rtcStats = {};
-}
+};
 
 /*
  * Setters

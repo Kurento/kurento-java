@@ -174,22 +174,20 @@ public class WebPage {
   /*
    * activatePeerConnectionInboundStats
    */
-  public void activatePeerConnectionInboundStats(String peerConnectionId) {
-    activatePeerConnectionStats("activateInboundRtcStats", peerConnectionId);
+  public void activatePeerConnectionInboundStats(String jsPeerConnectionVarName) {
+    activatePeerConnectionStats("activateInboundRtcStats", jsPeerConnectionVarName);
   }
 
   /*
    * activatePeerConnectionOutboundStats
    */
-  public void activatePeerConnectionOutboundStats(String peerConnectionId) {
-    activatePeerConnectionStats("activateOutboundRtcStats", peerConnectionId);
+  public void activatePeerConnectionOutboundStats(String jsPeerConnectionVarName) {
+    activatePeerConnectionStats("activateOutboundRtcStats", jsPeerConnectionVarName);
   }
 
-  private void activatePeerConnectionStats(String jsFunction, String peerConnectionId) {
-
+  private void activatePeerConnectionStats(String jsFunction, String jsPeerConnectionVarName) {
     try {
-      browser.executeScript("kurentoTest." + jsFunction + "('" + peerConnectionId + "');");
-
+      browser.executeScript("kurentoTest." + jsFunction + "('" + jsPeerConnectionVarName + "');");
     } catch (WebDriverException we) {
       we.printStackTrace();
 

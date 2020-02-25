@@ -170,19 +170,31 @@ public class WebRtcTestPage extends WebPage {
     browser.executeScript("initAudioDetection()");
   }
 
-  public int getPeerConnAudioPacketsRecv(PeerConnectionStats stats) {
-    String val = (String) stats.getStats()
-        .getOrDefault("audio_peerconnection_inbound_packetsReceived", "0");
-    int ret = 0;
-    try {
-      ret = Integer.parseInt(val);
-    } catch (NumberFormatException e) {
-    }
-    return ret;
+  public long getPeerConnAudioPacketsRecv(PeerConnectionStats stats) {
+    // "RTCReceivedRtpStreamStats.packetsReceived" is of type unsigned long long
+    // https://w3c.github.io/webrtc-stats/#dom-rtcreceivedrtpstreamstats-packetsreceived
+
+    final Long val = (Long) stats.getStats()
+        .getOrDefault("audio_peerconnection_inbound_packetsReceived", 0L);
+
+    return val;
   }
 
-  public long getPeerConnAudioInboundTimestamp(PeerConnectionStats stats) {
-    Long val = (Long) stats.getStats().getOrDefault("audio_peerconnection_inbound_timestamp", 0L);
+  public double getPeerConnAudioInboundTimestamp(PeerConnectionStats stats) {
+    // "RTCStats.timestamp" is of type double
+    // https://w3c.github.io/webrtc-stats/#dom-rtcstats-timestamp
+
+    double val = 0.0;
+    try {
+      val = (Double) stats.getStats().getOrDefault("audio_peerconnection_inbound_timestamp", 0.0);
+    } catch (ClassCastException e1) {
+      // However, sometimes it arrives to Java as a Long (eg. Firefox 72)
+      try {
+        val = (Long) stats.getStats().getOrDefault("audio_peerconnection_inbound_timestamp", 0L);
+      } catch (ClassCastException e2) {
+      }
+    }
+
     return val;
   }
 
