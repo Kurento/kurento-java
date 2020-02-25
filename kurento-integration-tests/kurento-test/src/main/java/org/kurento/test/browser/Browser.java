@@ -395,6 +395,15 @@ public class Browser implements Closeable {
     firefoxOptions.addPreference("media.autoplay.default", 0);
     firefoxOptions.addPreference("media.autoplay.enabled.user-gestures-needed", false);
 
+    // Route all console logs to stdout (https://github.com/mozilla/geckodriver/issues/284#issuecomment-458305621)
+    //
+    // This is needed because geckodriver (Selenium driver for Firefox) does NOT
+    // implement fetching console logs through its API (like Chrome does):
+    // driver.manage().logs() throws org.openqa.selenium.json.JsonException.
+    // For more information, follow this issue: https://github.com/mozilla/geckodriver/issues/284
+    firefoxOptions.addPreference("devtools.console.stdout.chrome", true); // Enable the stdout logging in console API when used in UI ("chrome") contexts
+    firefoxOptions.addPreference("devtools.console.stdout.content", true); // Enable the stdout logging in console API when used in content contexts
+
     // This allows to load pages with self-signed certificates
     capabilities.setCapability("acceptInsecureCerts", true);
 

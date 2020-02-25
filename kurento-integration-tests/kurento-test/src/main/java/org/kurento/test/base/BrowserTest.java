@@ -173,9 +173,20 @@ public abstract class BrowserTest<W extends WebPage> extends KurentoTest {
           WebDriver webDriver = browser.getWebDriver();
           if (webDriver != null) {
             String screenshotFileName = getDefaultOutputFile("-" + browserId + ".png");
-            getOrCreatePage(browserId).takeScreeshot(screenshotFileName);
-            browserLogs.put(browserId,
-                webDriver.manage().logs().get(LogType.BROWSER));
+            try {
+              getOrCreatePage(browserId).takeScreeshot(screenshotFileName);
+            } catch (IOException e) {
+              log.warn("Error taking screenshot from browser '{}': {}", browserId, e.getMessage());
+            }
+            try {
+              browserLogs.put(browserId, webDriver.manage().logs().get(LogType.BROWSER));
+            } catch (org.openqa.selenium.json.JsonException e) {
+              // TODO: Remove this catch() if/when Firefox geckodriver implements the logs() method
+              // (https://github.com/mozilla/geckodriver/issues/284)
+              log.warn(
+                  "Error fetching console logs from browser '{}': {} -- This is expected on Firefox, geckodriver doesn't implement 'driver.manage().logs()'. More info: https://github.com/mozilla/geckodriver/issues/284",
+                  browserId, e.getMessage());
+            }
           } else {
             log.warn("It was not possible to recover logs for {} "
                 + "since browser is no longer available (maybe "
