@@ -368,15 +368,16 @@ public abstract class BrowserTest<W extends WebPage> extends KurentoTest {
       }
 
       if (responseCode != HttpURLConnection.HTTP_OK) {
-        log.warn("URL " + url + " not reachable. Response code=" + responseCode);
+        log.warn("Timeout expired and URL '{}' still not reachable. Response code: {}", url,
+            responseCode);
+      } else {
+        log.debug("URL '{}' became reachable. Response code: {}", url, responseCode);
       }
     } catch (Exception e) {
       e.printStackTrace();
       Assert.fail("URL " + url + " not reachable in " + timeout + " seconds ("
           + e.getClass().getName() + ", " + e.getMessage() + ")");
     }
-
-    log.debug("URL {} already reachable", url);
   }
 
   public void waitSeconds(long waitTime) {
