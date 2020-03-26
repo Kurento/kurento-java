@@ -77,8 +77,10 @@ public class WebPage {
 
   /*
    * setThresholdTime
+   *
+   * The maximum divergence that will be accepted for time comparisons
    */
-  public void setThresholdTime(int thresholdTime) {
+  public void setThresholdTime(double thresholdTime) {
     browser.setThresholdTime(thresholdTime);
   }
 
@@ -356,7 +358,7 @@ public class WebPage {
   /*
    * getThresholdTime
    */
-  public int getThresholdTime() {
+  public double getThresholdTime() {
     return browser.getThresholdTime();
 
   }

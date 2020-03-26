@@ -213,7 +213,7 @@ public class RecorderWebRtcDisconnectTest extends BaseRecorder {
 
     AssertMedia.assertCodecs(recordingFile, expectedVideoCodec, expectedAudioCodec);
     AssertMedia.assertDuration(recordingFile, TimeUnit.SECONDS.toMillis(playtime),
-        TimeUnit.SECONDS.toMillis(getPage(BROWSER2).getThresholdTime()));
+        TimeUnit.SECONDS.toMillis((long)getPage(BROWSER2).getThresholdTime()));
 
     // Release Media Pipeline #2
     mp2.release();

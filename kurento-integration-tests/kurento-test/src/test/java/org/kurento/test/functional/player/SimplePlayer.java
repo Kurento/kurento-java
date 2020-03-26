@@ -27,6 +27,7 @@ import org.junit.Assert;
 import org.kurento.client.EndOfStreamEvent;
 import org.kurento.client.EventListener;
 import org.kurento.client.MediaFlowInStateChangeEvent;
+import org.kurento.client.MediaFlowOutStateChangeEvent;
 import org.kurento.client.MediaFlowState;
 import org.kurento.client.MediaPipeline;
 import org.kurento.client.PlayerEndpoint;
@@ -48,7 +49,7 @@ public class SimplePlayer extends PlayerTest {
 
   public void testPlayerWithRtsp(WebRtcChannel webRtcChannel) throws Exception {
     getPage().getBrowser().setTimeout(200);
-    testPlayer("rtsp://mm2.pcslab.com/mm/7m2000.mp4", webRtcChannel, 0, 50, 50, Color.BLACK);
+    testPlayer("rtsp://mm2.pcslab.com/mm/7m2000.mp4", webRtcChannel, 0.0, 0.0, 50, 50, Color.BLACK);
   }
 
   public void testPlayerWithSmallFileVideoOnly(Protocol protocol, VideoFormat videoFormat,
@@ -63,29 +64,37 @@ public class SimplePlayer extends PlayerTest {
 
   private void testPlayerWithSmallFile(Protocol protocol, VideoFormat videoFormat,
       WebRtcChannel webRtcChannel, boolean videoOnly) throws InterruptedException {
-    // Reduce threshold time per test
-    getPage().setThresholdTime(5); // seconds
-
     String nameMedia = "/video/format/";
     nameMedia += videoOnly ? "small_video_only." : "small.";
     nameMedia += videoFormat.toString();
 
     String mediaUrl = getMediaUrl(protocol, nameMedia);
 
-    log.debug(">>>> Playing small video ({}) on {}", webRtcChannel, mediaUrl);
-    testPlayer(mediaUrl, webRtcChannel, 5, 100, 100, new Color(128, 85, 46));
+    final double playTime = 5.0; // seconds
+    final double thresholdTime = playTime * 0.30; // seconds
+
+    final int x = 100;
+    final int y = 100;
+    final Color expectedColor = new Color(128, 85, 46);
+
+    log.debug(
+        ">>>> Playing small video ({}), URL: '{}', playtime: {} seconds, expected color {} at ({}, {})",
+        webRtcChannel, mediaUrl, playTime, expectedColor, x, y);
+
+    // Set maximum play time allowed to diverge from the expected one
+    getPage().setThresholdTime(thresholdTime);
+
+    testPlayer(mediaUrl, webRtcChannel, playTime, thresholdTime, x, y, expectedColor);
   }
 
-  public void testPlayer(String mediaUrl, WebRtcChannel webRtcChannel, int playtime)
-      throws InterruptedException {
-    testPlayer(mediaUrl, webRtcChannel, playtime, 0, 0, null);
+  public void testPlayer(String mediaUrl, WebRtcChannel webRtcChannel, double playtime,
+      double thresholdTime) throws InterruptedException {
+    testPlayer(mediaUrl, webRtcChannel, playtime, thresholdTime, 0, 0, null);
   }
 
-  public void testPlayer(String mediaUrl, WebRtcChannel webRtcChannel, int playtime, int x, int y,
-      Color expectedColor) throws InterruptedException {
-
+  public void testPlayer(String mediaUrl, WebRtcChannel webRtcChannel, double playtime,
+      double thresholdTime, int x, int y, Color expectedColor) throws InterruptedException {
     Timer gettingStats = new Timer();
-    final CountDownLatch errorContinuityAudiolatch = new CountDownLatch(1);
 
     // Media Pipeline
     MediaPipeline mp = kurentoClient.createMediaPipeline();
@@ -103,6 +112,15 @@ public class SimplePlayer extends PlayerTest {
         if (event.getState().equals(MediaFlowState.FLOWING)) {
           flowingLatch.countDown();
         }
+      }
+    });
+
+    playerEp.addMediaFlowOutStateChangeListener(new EventListener<MediaFlowOutStateChangeEvent>() {
+      @Override
+      public void onEvent(MediaFlowOutStateChangeEvent event) {
+        log.debug(
+            "[Kms.PlayerEndpoint.MediaFlowOutStateChange] -> endpoint: {}, mediaType: {}, state: {}",
+            playerEp.getId(), event.getMediaType(), event.getState());
       }
     });
 
@@ -128,13 +146,15 @@ public class SimplePlayer extends PlayerTest {
     Assert.assertTrue(String.format("Not received media (timeout waiting for 'playing' event): %s %s",
         mediaUrl, webRtcChannel), getPage().waitForEvent("playing"));
 
+    final CountDownLatch audioReceptionLatch = new CountDownLatch(1);
     if (webRtcChannel == WebRtcChannel.AUDIO_ONLY
         || webRtcChannel == WebRtcChannel.AUDIO_AND_VIDEO) {
       // Check continuous reception of audio packets
       getPage().activatePeerConnectionInboundStats("webRtcPeer.peerConnection");
 
-      gettingStats.schedule(new CheckAudioTimerTask(errorContinuityAudiolatch, getPage()), 100,
-          200);
+      // Set maximum time allowed without receiving audio
+      gettingStats.schedule(new CheckAudioTimerTask(audioReceptionLatch, getPage(), thresholdTime),
+          100, 200);
     }
 
     if (webRtcChannel != WebRtcChannel.AUDIO_ONLY) {
@@ -175,7 +195,6 @@ public class SimplePlayer extends PlayerTest {
       Color[] expectedColors) throws Exception {
 
     Timer gettingStats = new Timer();
-    final CountDownLatch errorContinuityAudiolatch = new CountDownLatch(1);
 
     MediaPipeline mp = kurentoClient.createMediaPipeline();
     PlayerEndpoint playerEp = new PlayerEndpoint.Builder(mp, mediaUrl).build();
@@ -234,12 +253,13 @@ public class SimplePlayer extends PlayerTest {
 
     playerEp.play();
 
+    final CountDownLatch audioReceptionLatch = new CountDownLatch(1);
     if (webRtcChannel == WebRtcChannel.AUDIO_ONLY
         || webRtcChannel == WebRtcChannel.AUDIO_AND_VIDEO) {
       // Checking continuity of the audio
       getPage().activatePeerConnectionInboundStats("webRtcPeer.peerConnection");
 
-      gettingStats.schedule(new CheckAudioTimerTask(errorContinuityAudiolatch, getPage()), 100,
+      gettingStats.schedule(new CheckAudioTimerTask(audioReceptionLatch, getPage()), 100,
           200);
     }
 
@@ -254,7 +274,7 @@ public class SimplePlayer extends PlayerTest {
     if (webRtcChannel == WebRtcChannel.AUDIO_ONLY
         || webRtcChannel == WebRtcChannel.AUDIO_AND_VIDEO) {
       Assert.assertTrue("Check audio. There were more than 2 seconds without receiving packets",
-          errorContinuityAudiolatch.getCount() == 1);
+          audioReceptionLatch.getCount() == 1);
     }
 
     // Assertions
@@ -272,7 +292,6 @@ public class SimplePlayer extends PlayerTest {
       Map<Integer, Color> expectedPositionAndColor) throws Exception {
 
     Timer gettingStats = new Timer();
-    final CountDownLatch errorContinuityAudiolatch = new CountDownLatch(1);
 
     MediaPipeline mp = kurentoClient.createMediaPipeline();
     PlayerEndpoint playerEp = new PlayerEndpoint.Builder(mp, mediaUrl).build();
@@ -311,12 +330,13 @@ public class SimplePlayer extends PlayerTest {
         "Not received media (timeout waiting playing event): " + mediaUrl + " " + webRtcChannel,
         getPage().waitForEvent("playing"));
 
+    final CountDownLatch audioReceptionLatch = new CountDownLatch(1);
     if (webRtcChannel == WebRtcChannel.AUDIO_ONLY
         || webRtcChannel == WebRtcChannel.AUDIO_AND_VIDEO) {
       // Checking continuity of the audio
       getPage().activatePeerConnectionInboundStats("webRtcPeer.peerConnection");
 
-      gettingStats.schedule(new CheckAudioTimerTask(errorContinuityAudiolatch, getPage()), 100,
+      gettingStats.schedule(new CheckAudioTimerTask(audioReceptionLatch, getPage()), 100,
           200);
     }
 
@@ -344,7 +364,7 @@ public class SimplePlayer extends PlayerTest {
     if (webRtcChannel == WebRtcChannel.AUDIO_ONLY
         || webRtcChannel == WebRtcChannel.AUDIO_AND_VIDEO) {
       Assert.assertTrue("Check audio. There were more than 2 seconds without receiving packets",
-          errorContinuityAudiolatch.getCount() == 1);
+          audioReceptionLatch.getCount() == 1);
     }
 
     Assert.assertTrue("Not received EOS event in player: " + mediaUrl + " " + webRtcChannel,

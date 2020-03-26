@@ -80,7 +80,6 @@ public class BaseRecorder extends FunctionalTest {
           throws InterruptedException {
 
     Timer gettingStats = new Timer();
-    final CountDownLatch errorContinuityAudiolatch = new CountDownLatch(1);
 
     getPage().subscribeEvents("playing");
     getPage().initWebRtc(webRtcEp, WebRtcChannel.AUDIO_AND_VIDEO, WebRtcMode.RCV_ONLY);
@@ -104,11 +103,12 @@ public class BaseRecorder extends FunctionalTest {
     Assert.assertTrue("Not received media (timeout waiting playing event)" + inRecording,
         getPage().waitForEvent("playing"));
 
+    final CountDownLatch audioReceptionLatch = new CountDownLatch(1);
     if (recorderEp == null) {
       // Checking continuity of the audio
       getPage().activatePeerConnectionInboundStats("webRtcPeer.peerConnection");
 
-      gettingStats.schedule(new CheckAudioTimerTask(errorContinuityAudiolatch, getPage()), 100,
+      gettingStats.schedule(new CheckAudioTimerTask(audioReceptionLatch, getPage()), 100,
           200);
     }
 
@@ -144,8 +144,7 @@ public class BaseRecorder extends FunctionalTest {
 
       AssertMedia.assertCodecs(recordingFile, expectedVideoCodec, expectedAudioCodec);
       AssertMedia.assertDuration(recordingFile, TimeUnit.SECONDS.toMillis(playTime),
-          TimeUnit.SECONDS.toMillis(getPage().getThresholdTime()));
-
+          TimeUnit.SECONDS.toMillis((long)getPage().getThresholdTime()));
     } else {
       gettingStats.cancel();
       getPage().stopPeerConnectionInboundStats("webRtcPeer.peerConnection");
@@ -156,7 +155,7 @@ public class BaseRecorder extends FunctionalTest {
 
       if (recorderEp == null) {
         Assert.assertTrue("Check audio. There were more than 2 seconds without receiving packets",
-            errorContinuityAudiolatch.getCount() == 1);
+            audioReceptionLatch.getCount() == 1);
       }
     }
   }
@@ -240,7 +239,6 @@ public class BaseRecorder extends FunctionalTest {
 
     // Checking continuity of the audio
     Timer gettingStats = new Timer();
-    final CountDownLatch errorContinuityAudiolatch = new CountDownLatch(1);
 
     waitForFileExists(recordingFile);
 
@@ -251,7 +249,7 @@ public class BaseRecorder extends FunctionalTest {
 
     // Playing the recording
     WebRtcTestPage checkPage = getPage(browserName);
-    checkPage.setThresholdTime(checkPage.getThresholdTime() * 2);
+    checkPage.setThresholdTime(checkPage.getThresholdTime() * 2.0);
     checkPage.subscribeEvents("playing");
     checkPage.initWebRtc(webRtcEp, WebRtcChannel.AUDIO_AND_VIDEO, WebRtcMode.RCV_ONLY);
     final CountDownLatch eosLatch = new CountDownLatch(1);
@@ -272,7 +270,8 @@ public class BaseRecorder extends FunctionalTest {
 
     checkPage.activatePeerConnectionInboundStats("webRtcPeer.peerConnection");
 
-    gettingStats.schedule(new CheckAudioTimerTask(errorContinuityAudiolatch, checkPage), 100, 200);
+    final CountDownLatch audioReceptionLatch = new CountDownLatch(1);
+    gettingStats.schedule(new CheckAudioTimerTask(audioReceptionLatch, checkPage), 100, 200);
 
     for (Color color : expectedColors) {
       Assert.assertTrue("The color of the recorded video should be " + color + " " + messageAppend,
@@ -289,11 +288,11 @@ public class BaseRecorder extends FunctionalTest {
         checkPage.compare(playTime, currentTime));
 
     Assert.assertTrue("Check audio. There were more than 2 seconds without receiving packets",
-        errorContinuityAudiolatch.getCount() == 1);
+        audioReceptionLatch.getCount() == 1);
 
     AssertMedia.assertCodecs(recordingFile, expectedVideoCodec, expectedAudioCodec);
     AssertMedia.assertDuration(recordingFile, TimeUnit.SECONDS.toMillis(playTime),
-        TimeUnit.SECONDS.toMillis(checkPage.getThresholdTime()));
+        TimeUnit.SECONDS.toMillis((long)checkPage.getThresholdTime()));
 
     mp.release();
   }

@@ -134,7 +134,7 @@ public class Browser implements Closeable {
   private String name;
   private String id;
   private double colorDistance;
-  private int thresholdTime;
+  private double thresholdTime;
   private int numInstances;
   private int browserPerInstance;
   private Protocol protocol;
@@ -839,11 +839,11 @@ public class Browser implements Closeable {
     return colorDistance;
   }
 
-  public int getThresholdTime() {
+  public double getThresholdTime() {
     return thresholdTime;
   }
 
-  public void setThresholdTime(int thresholdTime) {
+  public void setThresholdTime(double thresholdTime) {
     this.thresholdTime = thresholdTime;
   }
 
@@ -1022,7 +1022,7 @@ public class Browser implements Closeable {
   public static class Builder {
 
     private int timeout = 60; // seconds
-    private int thresholdTime = 10; // seconds
+    private double thresholdTime = 10.0; // seconds
     private double colorDistance = 60;
     private String node = getProperty(TEST_HOST_PROPERTY,
         getProperty(TEST_PUBLIC_IP_PROPERTY, TEST_PUBLIC_IP_DEFAULT));
@@ -1123,7 +1123,7 @@ public class Browser implements Closeable {
       return this;
     }
 
-    public Builder thresholdTime(int thresholdTime) {
+    public Builder thresholdTime(double thresholdTime) {
       this.thresholdTime = thresholdTime;
       return this;
     }

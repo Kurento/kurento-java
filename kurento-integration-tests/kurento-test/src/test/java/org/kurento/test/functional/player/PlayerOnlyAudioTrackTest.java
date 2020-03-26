@@ -74,7 +74,7 @@ public class PlayerOnlyAudioTrackTest extends FunctionalPlayerTest {
   private void initTest(Protocol protocol, String nameMedia) throws Exception {
     String mediaUrl = getMediaUrl(protocol, nameMedia);
 
-    testPlayer(mediaUrl, AUDIO_ONLY, 10);
+    testPlayer(mediaUrl, AUDIO_ONLY, 10.0, 7.0);
   }
 
   @Test

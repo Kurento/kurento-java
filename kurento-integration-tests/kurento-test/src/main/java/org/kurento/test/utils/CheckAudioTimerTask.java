@@ -20,7 +20,7 @@ public class CheckAudioTimerTask extends TimerTask {
 
   public static Logger log = LoggerFactory.getLogger(CheckAudioTimerTask.class);
 
-  private final CountDownLatch errorContinuityAudiolatch;
+  private final CountDownLatch audioReceptionLatch;
   private final WebRtcTestPage page;
 
   private long lastPacketsReceived = 0;
@@ -29,11 +29,33 @@ public class CheckAudioTimerTask extends TimerTask {
   private double currentTimestamp = 0.0;
   private double diffTimestamp = 0.0;
   private int count = 0;
-  private double packetsNoReceived = 0;
+  private double packetsMissed = 0.0;
 
-  public CheckAudioTimerTask(CountDownLatch errorContinuityAudiolatch, WebRtcTestPage page) {
-    this.errorContinuityAudiolatch = errorContinuityAudiolatch;
+  // Audio size (in milliseconds) of each individual packet.
+  // In the context of WebRTC, the OPUS audio format specifies that:
+  // A) Frames can represent 2.5, 5, 10, 20, 40, or 60 ms of audio data.
+  // B) An RTP packet MUST contain exactly one Opus frame.
+  // https://tools.ietf.org/html/rfc7587#section-4.2
+  //
+  // The most commonly used frame size if 20 ms, so that's what we'll assume here:
+  // OPUS audio frame size = 20
+  // OPUS RTP packets per frame = 1
+  // Expected packets per second = 1000 / 20 = 50
+  private final double PacketsPerSecond = 50.0;
+
+  // Maximum time threshold that audio can be missing without triggering an error.
+  private double thresholdTime = 4.0; // seconds
+
+  public CheckAudioTimerTask(CountDownLatch audioReceptionLatch, WebRtcTestPage page) {
+    this.audioReceptionLatch = audioReceptionLatch;
     this.page = page;
+  }
+
+  public CheckAudioTimerTask(CountDownLatch audioReceptionLatch, WebRtcTestPage page,
+      double thresholdTime) {
+    this.audioReceptionLatch = audioReceptionLatch;
+    this.page = page;
+    this.thresholdTime = thresholdTime;
   }
 
   @Override
@@ -58,19 +80,22 @@ public class CheckAudioTimerTask extends TimerTask {
 
     if (((currentPacketsReceived - lastPacketsReceived) == 0) && (lastTimestamp > 0.0)) {
       // Packets that must be received in (currentTimestamp - lastTimestamp)
-      // Assume that 50 packets/second are received
-      double packetsMustReceive = (diffTimestamp * 50.0) / 1000.0;
-      packetsNoReceived = packetsNoReceived + packetsMustReceive;
-      log.warn("PacketsNoReceived: {}", packetsNoReceived);
+      final double packetsExpected = diffTimestamp * PacketsPerSecond / 1000.0;
+      packetsMissed += packetsExpected;
+      log.warn("Received {} less audio packets than expected!",
+          new DecimalFormat("0").format(packetsMissed));
     } else {
-      // Set 0 because we are looking for the continuity of the audio, and
-      // if (current -last) > 0 --> it receives audio packets again
-      packetsNoReceived = 0;
+      // Reset to 0 because we are looking for the continuity of the audio, and
+      // if (current - last) > 0, then we must be receiving audio packets
+      packetsMissed = 0;
     }
 
-    if (packetsNoReceived >= 200) {
-      log.warn("PacketsNoReceived >= 200");
-      errorContinuityAudiolatch.countDown();
+    final double thresholdPackets = PacketsPerSecond * thresholdTime;
+    if (packetsMissed >= thresholdPackets) {
+      log.error("Reached limit of missed audio packets: {} in {} ms",
+          new DecimalFormat("0").format(thresholdPackets),
+          new DecimalFormat("0.00").format(thresholdTime * 1000.0));
+      audioReceptionLatch.countDown();
     }
   }
 }

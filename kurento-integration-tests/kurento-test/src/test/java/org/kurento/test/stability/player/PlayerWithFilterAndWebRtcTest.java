@@ -97,7 +97,6 @@ public class PlayerWithFilterAndWebRtcTest extends StabilityTest {
   private void doTest(String mediaUrl, Color expectedColor) throws Exception {
     // Test data
     Timer gettingStats = new Timer();
-    final CountDownLatch errorContinuityAudiolatch = new CountDownLatch(1);
 
     final int playTimeSeconds = 3;
     final int numRepeat = 200;
@@ -148,7 +147,8 @@ public class PlayerWithFilterAndWebRtcTest extends StabilityTest {
 
     getPage().activatePeerConnectionInboundStats("webRtcPeer.peerConnection");
 
-    gettingStats.schedule(new CheckAudioTimerTask(errorContinuityAudiolatch, getPage()), 100, 200);
+    final CountDownLatch audioReceptionLatch = new CountDownLatch(1);
+    gettingStats.schedule(new CheckAudioTimerTask(audioReceptionLatch, getPage()), 100, 200);
     for (int i = 0; i < numRepeat; i++) {
       playerEp.setPosition(0);
       Assert.assertTrue("The color of the video should be " + expectedColor,
@@ -157,7 +157,7 @@ public class PlayerWithFilterAndWebRtcTest extends StabilityTest {
       Thread.sleep(TimeUnit.SECONDS.toMillis(playTimeSeconds));
 
       Assert.assertTrue("Check audio. There were more than 2 seconds without receiving packets",
-          errorContinuityAudiolatch.getCount() == 1);
+          audioReceptionLatch.getCount() == 1);
 
       filter.release();
       filter = new FaceOverlayFilter.Builder(mp).build();

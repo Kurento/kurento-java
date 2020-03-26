@@ -192,7 +192,7 @@ public class RecorderPlayerDisconnectTest extends BaseRecorder {
 
     AssertMedia.assertCodecs(recordingFile, expectedVideoCodec, expectedAudioCodec);
     AssertMedia.assertDuration(recordingFile, TimeUnit.SECONDS.toMillis(playtime),
-        TimeUnit.SECONDS.toMillis(getPage().getThresholdTime()));
+        TimeUnit.SECONDS.toMillis((long)getPage().getThresholdTime()));
 
     // Release Media Pipeline #2
     mp2.release();

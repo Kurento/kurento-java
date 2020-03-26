@@ -230,11 +230,11 @@ public class RecorderWebRtcTest extends BaseRecorder {
     AssertMedia.assertCodecs(recordingFile, expectedVideoCodec, expectedAudioCodec);
 
     AssertMedia.assertGeneralDuration(recordingFile, SECONDS.toMillis(playtime),
-        SECONDS.toMillis(getPage().getThresholdTime()));
+        SECONDS.toMillis((long)getPage().getThresholdTime()));
 
     if (webRtcChannel == AUDIO_AND_VIDEO || webRtcChannel == AUDIO_ONLY) {
       AssertMedia.assertAudioDuration(recordingFile, SECONDS.toMillis(playtime),
-          SECONDS.toMillis(getPage().getThresholdTime()));
+          SECONDS.toMillis((long)getPage().getThresholdTime()));
     }
 
     // Release Media Pipeline #2

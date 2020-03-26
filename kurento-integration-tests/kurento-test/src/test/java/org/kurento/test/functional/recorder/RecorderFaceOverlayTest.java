@@ -74,7 +74,7 @@ import org.kurento.test.config.TestScenario;
 public class RecorderFaceOverlayTest extends BaseRecorder {
 
   private static final int PLAYTIME = 30; // seconds
-  private static final int THRESHOLD = 20; // seconds
+  private static final double THRESHOLD = 20.0; // seconds
   private static final Color EXPECTED_COLOR = Color.RED;
   private static final int EXPECTED_COLOR_X = 420;
   private static final int EXPECTED_COLOR_Y = 45;
