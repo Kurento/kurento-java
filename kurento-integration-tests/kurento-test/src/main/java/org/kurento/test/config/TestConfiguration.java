@@ -134,6 +134,9 @@ public class TestConfiguration {
   public static final String KMS_WS_URI_PROP_EXPORT = "kms.url";
   public static final String KMS_WS_URI_DEFAULT = "ws://localhost:8888/kurento";
 
+  public static final String KMS_LOG_LEVEL_PROP = "kms.log.level";
+  public static final String KMS_LOG_LEVEL_DEFAULT = "3,Kurento*:5,kms*:5,sdp*:4,webrtc*:4,*rtpendpoint:4,rtp*handler:4,rtpsynchronizer:4,agnosticbin:4";
+
   public static final String KMS_LOG_PATH_PROP = "kms.log.path";
   public static final String KMS_LOG_PATH_DEFAULT = "/var/log/kurento-media-server/";
 
@@ -142,10 +145,6 @@ public class TestConfiguration {
 
   public static final String KMS_SERVER_COMMAND_PROP = "kms.command";
   public static final String KMS_SERVER_COMMAND_DEFAULT = "/usr/bin/kurento-media-server";
-
-  public static final String KMS_SERVER_DEBUG_PROP = "kms.debug";
-  public static final String KMS_SERVER_DEBUG_DEFAULT =
-      "3,Kurento*:5,kms*:5,sdp*:4,webrtc*:4,*rtpendpoint:4,rtp*handler:4,rtpsynchronizer:4,agnosticbin:4";
 
   public static final String KMS_LOGIN_PROP = "kms.login";
   public static final String KMS_PASSWD_PROP = "kms.passwd";

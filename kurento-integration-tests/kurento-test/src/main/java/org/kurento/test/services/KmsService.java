@@ -35,6 +35,8 @@ import static org.kurento.test.config.TestConfiguration.KMS_DOCKER_S3_SECRET_ACC
 import static org.kurento.test.config.TestConfiguration.KMS_GENERATE_RTP_PTS_STATS_PROPERTY;
 import static org.kurento.test.config.TestConfiguration.KMS_GST_PLUGINS_DEFAULT;
 import static org.kurento.test.config.TestConfiguration.KMS_LOGIN_PROP;
+import static org.kurento.test.config.TestConfiguration.KMS_LOG_LEVEL_DEFAULT;
+import static org.kurento.test.config.TestConfiguration.KMS_LOG_LEVEL_PROP;
 import static org.kurento.test.config.TestConfiguration.KMS_LOG_PATH_DEFAULT;
 import static org.kurento.test.config.TestConfiguration.KMS_LOG_PATH_PROP;
 import static org.kurento.test.config.TestConfiguration.KMS_PASSWD_PROP;
@@ -45,8 +47,6 @@ import static org.kurento.test.config.TestConfiguration.KMS_SCOPE_ELASTEST;
 import static org.kurento.test.config.TestConfiguration.KMS_SCOPE_PROP;
 import static org.kurento.test.config.TestConfiguration.KMS_SERVER_COMMAND_DEFAULT;
 import static org.kurento.test.config.TestConfiguration.KMS_SERVER_COMMAND_PROP;
-import static org.kurento.test.config.TestConfiguration.KMS_SERVER_DEBUG_DEFAULT;
-import static org.kurento.test.config.TestConfiguration.KMS_SERVER_DEBUG_PROP;
 import static org.kurento.test.config.TestConfiguration.KMS_WS_URI_DEFAULT;
 import static org.kurento.test.config.TestConfiguration.KMS_WS_URI_PROP;
 import static org.kurento.test.config.TestConfiguration.KMS_WS_URI_PROP_EXPORT;
@@ -804,7 +804,7 @@ public class KmsService extends TestService {
   }
 
   private String getDebugOptions() {
-    return getProperty(KMS_SERVER_DEBUG_PROP, KMS_SERVER_DEBUG_DEFAULT);
+    return getProperty(KMS_LOG_LEVEL_PROP, KMS_LOG_LEVEL_DEFAULT);
   }
 
   private String getKurentoGenerateRtpPtsStats() {
