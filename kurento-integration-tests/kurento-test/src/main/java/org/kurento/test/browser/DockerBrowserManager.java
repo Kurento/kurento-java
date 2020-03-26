@@ -334,27 +334,35 @@ public class DockerBrowserManager {
   }
 
   private void downloadLogsForContainer(String container, String logName) {
+    if (downloadLogsPath == null) {
+      return;
+    }
 
-    if (downloadLogsPath != null) {
-
-      try {
-
-        String logFileName = new File(KurentoTest.getDefaultOutputFile("-" + logName + "-container.log"))
-            .getAbsolutePath();
+    // Retrieve Docker logs
+    String logFileName = new File(
+        KurentoTest.getDefaultOutputFile("-" + logName + "-container.log")).getAbsolutePath();
         Path logFile = downloadLogsPath.resolve(logFileName);
-
-        if (Files.exists(logFile.getParent())) {
+    try {
+      if (!Files.exists(logFile.getParent())) {
           Files.createDirectories(logFile.getParent());
         }
-
-        log.debug("Downloading log for container '{}' in file '{}'", container,
-            logFile.toAbsolutePath());
-
         docker.downloadLog(container, logFile);
-
       } catch (IOException e) {
         log.warn("Error downloading log from container '{}'", container, e);
       }
+
+    // Copy other log files
+    // log.debug("ls /home/ubuntu/:\n{}", docker.execCommand(container, true, "ls", "-la", "/home/ubuntu"));
+    docker.copyFileFromContainer(container, "/home/ubuntu/pulseaudio.log",
+        KurentoTest.getDefaultOutputFolder().getAbsolutePath());
+
+    String selenoidLogs = docker.execCommand(container, true, "ls", "-1",
+        "/home/ubuntu/selenoid-logs");
+    // log.debug("ls /home/ubuntu/selenoid-logs/:\n{}", selenoidLogs);
+    String[] selenoidLogFiles = selenoidLogs.split("\\r?\\n|\\r");
+    for (String fileName : selenoidLogFiles) {
+      docker.copyFileFromContainer(container, "/home/ubuntu/selenoid-logs/" + fileName,
+          KurentoTest.getDefaultOutputFolder().getAbsolutePath());
     }
   }
 
