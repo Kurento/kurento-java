@@ -357,16 +357,10 @@ public class Docker implements Closeable {
       log.debug("Container '{}' is running, need to stop it", containerName);
 
       if (withRecording) {
-        String stopRecordingOutput = execCommand(containerName, true, "stop-video-recording.sh");
+        String stopRecordingOutput = execCommand(containerName, true, "stop-video-recording.sh")
+            .trim();
         log.debug("Stop recording in container '{}', command output: '{}':", containerName,
             stopRecordingOutput);
-
-        try {
-          // Wait for FFMPEG to finish writing recording file
-          Thread.sleep(5000);
-        } catch (InterruptedException e) {
-          log.warn("Exception waiting for recording file", e);
-        }
 
         if (recordingNameMap.containsKey(containerName)) {
           String recordingName = recordingNameMap.get(containerName);
@@ -456,7 +450,8 @@ public class Docker implements Closeable {
       createContainerCmd.withNetworkMode("bridge");
     }
 
-    createContainerCmd.exec();
+    // Allocate a TTY for the container, so all commands stdin/out/err is not bufferized
+    createContainerCmd.withTty(true).exec();
 
     log.debug("Container '{}' created", nodeName);
 
@@ -529,7 +524,8 @@ public class Docker implements Closeable {
 
     createContainerCmd.withLabels(labels);
 
-    createContainerCmd.exec();
+    // Allocate a TTY for the container, so all commands stdin/out/err is not bufferized
+    createContainerCmd.withTty(true).exec();
 
     log.debug("Container '{}' created", nodeName);
 
@@ -713,10 +709,9 @@ public class Docker implements Closeable {
 
     LogContainerRetrieverCallback loggingCallback = new LogContainerRetrieverCallback(file);
 
-    getClient().logContainerCmd(containerName).withStdErr(true).withStdOut(true)
-        .exec(loggingCallback);
-
     try {
+      getClient().logContainerCmd(containerName).withStdErr(true).withStdOut(true)
+          .exec(loggingCallback).awaitStarted();
       loggingCallback.awaitCompletion();
     } catch (InterruptedException e) {
       log.warn("Interrupted while downloading log from container '{}'", containerName);
@@ -758,20 +753,29 @@ public class Docker implements Closeable {
         .withAttachStdin(true).withAttachStdout(true).withAttachStderr(true).exec();
 
     ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-    String output = null;
-    try {
-      ExecStartResultCallback resultCallback = client.execStartCmd(exec.getId()).withDetach(false)
-          .withTty(true).exec(new ExecStartResultCallback(outputStream, System.err));
-      if (awaitCompletion) {
-          resultCallback.awaitCompletion();
-      }
-      output = new String(outputStream.toByteArray());
-    } catch (InterruptedException e) {
-      log.warn("Exception executing command '{}' on container '{}'", Arrays.toString(command),
-          containerId, e);
+    OutputStream stdout, stderr;
+
+    if (awaitCompletion) {
+      stdout = outputStream;
+      stderr = outputStream;
+    } else {
+      stdout = System.out;
+      stderr = System.err;
     }
 
-    return output;
+    ExecStartResultCallback resultCallback = client.execStartCmd(exec.getId()).withDetach(false)
+        .withTty(true).exec(new ExecStartResultCallback(stdout, stderr));
+
+    if (awaitCompletion) {
+      try {
+        resultCallback.awaitCompletion();
+      } catch (InterruptedException e) {
+        log.warn("Exception executing command '{}' on container '{}'", Arrays.toString(command),
+            containerId, e);
+      }
+    }
+
+    return outputStream.toString();
   }
 
   public void copyFileFromContainer(String containerName, String containerFile, String hostFolder) {
