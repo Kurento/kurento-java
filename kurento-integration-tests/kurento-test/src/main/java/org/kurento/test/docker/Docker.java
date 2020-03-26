@@ -19,6 +19,8 @@ package org.kurento.test.docker;
 
 import static com.github.dockerjava.api.model.Capability.SYS_ADMIN;
 import static org.kurento.commons.PropertiesManager.getProperty;
+import static org.kurento.test.config.TestConfiguration.TEST_DOCKER_FORCE_PULLING_DEFAULT;
+import static org.kurento.test.config.TestConfiguration.TEST_DOCKER_FORCE_PULLING_PROP;
 import static org.kurento.test.config.TestConfiguration.TEST_SELENIUM_TRANSPORT;
 
 import java.io.BufferedReader;
@@ -267,11 +269,15 @@ public class Docker implements Closeable {
 
   }
 
-  public void pullImageIfNecessary(String imageId, boolean force) {
+  public void pullImageIfNeeded(String imageId) {
     if (imageId.isEmpty()) {
       return;
     }
-    if (force || !existsImage(imageId)) {
+
+    final boolean forcePulling = getProperty(TEST_DOCKER_FORCE_PULLING_PROP,
+        TEST_DOCKER_FORCE_PULLING_DEFAULT);
+
+    if (forcePulling || !existsImage(imageId)) {
       log.debug("Pulling Docker image '{}'... please wait", imageId);
       try {
         getClient().pullImageCmd(imageId).exec(new PullImageResultCallback()).awaitCompletion();
@@ -420,13 +426,12 @@ public class Docker implements Closeable {
 
   public void startNode(String id, BrowserType browserType, String nodeName, String imageId,
       boolean record) {
-    // Create node
-    pullImageIfNecessary(imageId, true);
-
     log.debug("Creating container for browser '{}'", id);
 
-    CreateContainerCmd createContainerCmd =
-        getClient().createContainerCmd(imageId).withPrivileged(true).withCapAdd(SYS_ADMIN).withName(nodeName);
+    pullImageIfNeeded(imageId);
+
+    CreateContainerCmd createContainerCmd = getClient().createContainerCmd(imageId)
+        .withPrivileged(true).withCapAdd(SYS_ADMIN).withName(nodeName);
     mountDefaultFolders(createContainerCmd);
     mountFiles(createContainerCmd);
 
@@ -491,10 +496,9 @@ public class Docker implements Closeable {
 
   public void startNode(String id, BrowserType browserType, String nodeName, String imageId,
       boolean record, String containerIp) {
-    // Create node
-    pullImageIfNecessary(imageId, true);
-
     log.debug("Creating container for browser '{}'", id);
+
+    pullImageIfNeeded(imageId);
 
     CreateContainerCmd createContainerCmd = getClient().createContainerCmd(imageId)
         .withPrivileged(true).withCapAdd(SYS_ADMIN).withName(nodeName);

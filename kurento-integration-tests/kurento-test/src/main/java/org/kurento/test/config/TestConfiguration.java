@@ -155,10 +155,6 @@ public class TestConfiguration {
   public static final String KMS_DOCKER_IMAGE_NAME_DEFAULT =
       "kurento/kurento-media-server-dev:latest";
 
-  public static final String KMS_DOCKER_IMAGE_FORCE_PULLING_PROP =
-      "test.kms.docker.image.forcepulling";
-  public static final boolean KMS_DOCKER_IMAGE_FORCE_PULLING_DEFAULT = true;
-
   public static final String KMS_STUN_IP_PROPERTY = "kms.stun.ip";
   public static final String KMS_STUN_PORT_PROPERTY = "kms.stun.port";
 
@@ -249,6 +245,9 @@ public class TestConfiguration {
 
   public static final String TEST_WORKSPACE_HOST_PROP = "test.workspace.host";
   public static final String TEST_WORKSPACE_HOST_DEFAULT = "/tmp";
+
+  public static final String TEST_DOCKER_FORCE_PULLING_PROP = "test.docker.forcepulling";
+  public static final boolean TEST_DOCKER_FORCE_PULLING_DEFAULT = true;
 
   // Other keys
   public static final String TEST_SEEK_REPETITIONS = "test.seek.repetitions";

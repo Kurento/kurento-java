@@ -26,8 +26,6 @@ import static org.kurento.test.config.TestConfiguration.AUTOSTART_TESTSUITE_VALU
 import static org.kurento.test.config.TestConfiguration.AUTOSTART_TEST_VALUE;
 import static org.kurento.test.config.TestConfiguration.KMS_AUTOSTART_DEFAULT;
 import static org.kurento.test.config.TestConfiguration.KMS_AUTOSTART_PROP;
-import static org.kurento.test.config.TestConfiguration.KMS_DOCKER_IMAGE_FORCE_PULLING_DEFAULT;
-import static org.kurento.test.config.TestConfiguration.KMS_DOCKER_IMAGE_FORCE_PULLING_PROP;
 import static org.kurento.test.config.TestConfiguration.KMS_DOCKER_IMAGE_NAME_DEFAULT;
 import static org.kurento.test.config.TestConfiguration.KMS_DOCKER_IMAGE_NAME_PROP;
 import static org.kurento.test.config.TestConfiguration.KMS_DOCKER_S3_ACCESS_KEY_ID;
@@ -53,6 +51,8 @@ import static org.kurento.test.config.TestConfiguration.KMS_WS_URI_DEFAULT;
 import static org.kurento.test.config.TestConfiguration.KMS_WS_URI_PROP;
 import static org.kurento.test.config.TestConfiguration.KMS_WS_URI_PROP_EXPORT;
 import static org.kurento.test.config.TestConfiguration.KSM_GST_PLUGINS_PROP;
+import static org.kurento.test.config.TestConfiguration.TEST_DOCKER_FORCE_PULLING_DEFAULT;
+import static org.kurento.test.config.TestConfiguration.TEST_DOCKER_FORCE_PULLING_PROP;
 import static org.kurento.test.config.TestConfiguration.TEST_ICE_CANDIDATE_KMS_TYPE;
 import static org.kurento.test.config.TestConfiguration.TEST_ICE_CANDIDATE_SELENIUM_TYPE;
 import static org.kurento.test.config.TestConfiguration.TEST_ICE_SERVER_URL_PROPERTY;
@@ -469,14 +469,7 @@ public class KmsService extends TestService {
     String kmsImageName = getProperty(KMS_DOCKER_IMAGE_NAME_PROP, KMS_DOCKER_IMAGE_NAME_DEFAULT);
 
     log.debug("Starting KMS container '{}'", dockerContainerName);
-    boolean forcePulling =
-        getProperty(KMS_DOCKER_IMAGE_FORCE_PULLING_PROP, KMS_DOCKER_IMAGE_FORCE_PULLING_DEFAULT);
-
-    if (!dockerClient.existsImage(kmsImageName) || forcePulling) {
-      log.debug("Pulling KMS image {} ... please wait", kmsImageName);
-      dockerClient.pullImageIfNecessary(kmsImageName, true);
-      log.debug("KMS image {} pulled", kmsImageName);
-    }
+    dockerClient.pullImageIfNeeded(kmsImageName);
 
     // Check S3 properties
     String s3BucketName = getProperty(KMS_DOCKER_S3_BUCKET_NAME);
