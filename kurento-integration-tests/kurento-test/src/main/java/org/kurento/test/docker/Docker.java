@@ -196,27 +196,6 @@ public class Docker implements Closeable {
     return exists;
   }
 
-  public void createContainer(String imageId, String containerName, boolean mountFolders,
-      String... env) {
-
-    pullImageIfNecessary(imageId, false);
-
-    log.debug("Creating container '{}'", containerName);
-
-    CreateContainerCmd createContainerCmd =
-        getClient().createContainerCmd(imageId).withName(containerName).withEnv(env)
-        .withVolumes(new Volume("/var/run/docker.sock"));
-
-    if (mountFolders) {
-      mountDefaultFolders(createContainerCmd);
-    }
-
-    createContainerCmd.exec();
-
-    log.debug("Container '{}' started...", containerName);
-
-  }
-
   public void mountFiles(CreateContainerCmd createContainerCmd) {
     String videoFilesDiskPath = "/var/lib/jenkins/test-files";
     Volume configVol = new Volume(KurentoTest.getTestFilesDiskPath());
