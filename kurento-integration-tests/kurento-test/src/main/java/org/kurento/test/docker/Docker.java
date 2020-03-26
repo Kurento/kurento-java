@@ -29,9 +29,9 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.InetAddress;
-import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
@@ -162,9 +162,26 @@ public class Docker implements Closeable {
   }
 
   public boolean isRunningContainer(String containerName) {
-    boolean isRunning = inspectContainer(containerName).getState().getRunning();
-    log.trace("Container '{}' is running: {}", containerName, isRunning);
-    return isRunning;
+    // Ask the Docker daemon if the container is already in state "Running"
+    if (!inspectContainer(containerName).getState().getRunning()) {
+      log.trace("Container '{}' is not running", containerName);
+      return false;
+    }
+    log.trace("Container '{}' is running", containerName);
+
+    // Check our custom lock file to see if the entrypoint script is still busy
+    try {
+      getClient().copyArchiveFromContainerCmd(containerName, "/home/ubuntu/entrypoint.lock").exec()
+          .close();
+    } catch (NotFoundException e) {
+      // The lock file wasn't found, that means container is ready
+      log.debug("Container '{}' is ready", containerName);
+      return true;
+    } catch (IOException e) {
+    }
+
+    log.debug("Container '{}' is not ready", containerName);
+    return false;
   }
 
   public boolean existsImage(String imageName) {
@@ -446,8 +463,6 @@ public class Docker implements Closeable {
     // Start node if stopped
     startContainer(nodeName);
 
-    startRecordingIfNeeded(id, nodeName, record);
-
     logMounts(nodeName);
 
     logNetworks(nodeName);
@@ -521,8 +536,6 @@ public class Docker implements Closeable {
     // Start node if stopped
     startContainer(nodeName);
 
-    startRecordingIfNeeded(id, nodeName, record);
-
     logMounts(nodeName);
 
     logNetworks(nodeName);
@@ -532,12 +545,16 @@ public class Docker implements Closeable {
      boolean record) {
     startNode(id, browserType, nodeName, imageId, record);
     waitForContainer(nodeName);
+
+    startRecordingIfNeeded(id, nodeName, record);
   }
 
   public void startAndWaitNode(String id, BrowserType browserType, String nodeName, String imageId,
      boolean record, String containerIp) {
     startNode(id, browserType, nodeName, imageId, record, containerIp);
     waitForContainer(nodeName);
+
+    startRecordingIfNeeded(id, nodeName, record);
   }
 
   public void waitForContainer(String containerName) {
