@@ -29,6 +29,7 @@ import org.kurento.client.EventListener;
 import org.kurento.client.IceCandidate;
 import org.kurento.client.IceCandidateFoundEvent;
 import org.kurento.client.MediaStateChangedEvent;
+import org.kurento.client.NewCandidatePairSelectedEvent;
 import org.kurento.client.WebRtcEndpoint;
 import org.kurento.commons.exception.KurentoException;
 import org.kurento.jsonrpc.JsonUtils;
@@ -355,6 +356,17 @@ public class WebRtcTestPage extends WebPage {
               candidate.get("candidate").getAsString(), webRtcIpvMode, webRtcCandidateType);
           addIceCandidate(candidate);
         }
+      }
+    });
+
+    webRtcEndpoint
+        .addNewCandidatePairSelectedListener(new EventListener<NewCandidatePairSelectedEvent>() {
+          @Override
+          public void onEvent(NewCandidatePairSelectedEvent event) {
+            log.debug("[Kms.WebRtcEndpoint.NewCandidatePairSelected] -> streamId: '{}', local: '{}', remote: '{}'",
+                event.getCandidatePair().getStreamID(),
+                event.getCandidatePair().getLocalCandidate(),
+                event.getCandidatePair().getRemoteCandidate());
       }
     });
 
