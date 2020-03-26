@@ -525,7 +525,7 @@ public class Docker implements Closeable {
   }
 
   public void startAndWaitNode(String id, BrowserType browserType, String nodeName, String imageId,
-     boolean record, String containerIp) {
+      boolean record, String containerIp) {
     startNode(id, browserType, nodeName, imageId, record, containerIp);
     waitForContainer(nodeName);
 

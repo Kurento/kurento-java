@@ -428,8 +428,9 @@ public class KmsService extends TestService {
     if (wsUri != null) {
       WebSocketContainer container = ContainerProvider.getWebSocketContainer();
 
-      final int retries = 600;
-      final int waitTime = 100;
+      // Wait for a total of 60 seconds
+      final int retries = 120;
+      final int waitTime = 500;
 
       for (int i = 0; i < retries; i++) {
         try {
@@ -507,7 +508,7 @@ public class KmsService extends TestService {
               "S3_ACCESS_KEY_ID=" + s3AccessKeyId, "S3_SECRET_ACCESS_KEY=" + s3SecretAccessKey,
               "S3_HOSTNAME=" + s3Hostname, "KMS_TURN_URL=" + kmsTurnIp,
               "KURENTO_GENERATE_RTP_PTS_STATS=" + getKurentoGenerateRtpPtsStats())
-              .withCmd("--gst-debug-no-color").withVolumes(new Volume("/var/run/docker.sock"));
+          .withCmd("--gst-debug-no-color").withVolumes(new Volume("/var/run/docker.sock"));
     } else {
       if (kmsDnat && seleniumDnat && RELAY.toString().toUpperCase().equals(seleniumCandidateType)
           && SRFLX.toString().toUpperCase().equals(kmsCandidateType)) {
@@ -538,10 +539,10 @@ public class KmsService extends TestService {
 
     if (dockerClient.isRunningInContainer()) {
       createContainerCmd.withVolumesFrom(new VolumesFrom(dockerClient.getContainerId()));
-      if(isKmsElastest) {
-          String elastestNetwork = dockerClient.getContainerFirstNetworkName();
-          log.debug("Using Elastest network: {}", elastestNetwork);
-          createContainerCmd.withNetworkMode(elastestNetwork);
+      if (isKmsElastest) {
+        String elastestNetwork = dockerClient.getContainerFirstNetworkName();
+        log.debug("Using Elastest network: {}", elastestNetwork);
+        createContainerCmd.withNetworkMode(elastestNetwork);
       }
     } else {
       String testFilesPath = KurentoTest.getTestFilesDiskPath();
@@ -574,7 +575,7 @@ public class KmsService extends TestService {
       CreateContainerResponse kmsContainer = createContainerCmd.exec();
       dockerClient.getClient().startContainerCmd(kmsContainer.getId()).exec();
       kmsAddress = dockerClient.inspectContainer(dockerContainerName).getNetworkSettings()
-              .getNetworks().values().iterator().next().getIpAddress();
+          .getNetworks().values().iterator().next().getIpAddress();
     }
 
     setWsUri("ws://" + kmsAddress + ":8888/kurento");
