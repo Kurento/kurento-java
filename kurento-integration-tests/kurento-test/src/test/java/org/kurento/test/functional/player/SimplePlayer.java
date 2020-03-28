@@ -64,18 +64,16 @@ public class SimplePlayer extends PlayerTest {
 
   private void testPlayerWithSmallFile(Protocol protocol, VideoFormat videoFormat,
       WebRtcChannel webRtcChannel, boolean videoOnly) throws InterruptedException {
-    String nameMedia = "/video/format/";
-    nameMedia += videoOnly ? "small_video_only." : "small.";
-    nameMedia += videoFormat.toString();
 
+    String nameMedia = "/video/15sec/rgb640x360.mov";
     String mediaUrl = getMediaUrl(protocol, nameMedia);
 
-    final double playTime = 5.0; // seconds
+    // Characteristics of the test media file
+    final double playTime = 15.0; // seconds
     final double thresholdTime = playTime * 0.30; // seconds
-
     final int x = 100;
     final int y = 100;
-    final Color expectedColor = new Color(128, 85, 46);
+    final Color expectedColor = new Color(0, 0, 255);
 
     log.debug(
         ">>>> Playing small video ({}), URL: '{}', playtime: {} seconds, expected color {} at ({}, {})",
