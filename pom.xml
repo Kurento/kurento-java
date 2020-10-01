@@ -19,7 +19,7 @@
 		Java Client API for Kurento Media Server
 	</description>
 
-	<!-- Project configuration -->
+	<!-- Project-level configuration -->
 
 	<properties>
 		<main.basedir>${basedir}</main.basedir>
