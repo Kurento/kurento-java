@@ -11,3 +11,8 @@ target
 log.xml
 .externalToolBuilders
 *.pyc
+#####
+# Intellij
+####
+.idea/
+*.iml
