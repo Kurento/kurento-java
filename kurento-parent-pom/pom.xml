@@ -94,7 +94,7 @@
 		<webjars.webrtc-adapter.version>7.4.0</webjars.webrtc-adapter.version>
 
 		<version.jetty>9.4.49.v20220914</version.jetty>
-		<version.netty>4.1.85.Final</version.netty>
+		<version.netty>4.1.86.Final</version.netty>
 
 		<version.apache.activemq>5.7.0</version.apache.activemq>
 		<version.apache.commons-fileupload>1.4</version.apache.commons-fileupload>
