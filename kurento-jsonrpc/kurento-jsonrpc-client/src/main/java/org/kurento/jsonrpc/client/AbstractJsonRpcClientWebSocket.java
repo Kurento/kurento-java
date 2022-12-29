@@ -778,7 +778,7 @@ public abstract class AbstractJsonRpcClientWebSocket extends JsonRpcClient {
       fireConnected();
     }
 
-    if (heartbeating) {
+    if (!heartbeating) {
       enableHeartbeat();
     }
   }
