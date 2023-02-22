@@ -97,7 +97,7 @@
 		<version.netty>4.1.85.Final</version.netty>
 
 		<version.apache.activemq>5.7.0</version.apache.activemq>
-		<version.apache.commons-fileupload>1.4</version.apache.commons-fileupload>
+		<version.apache.commons-fileupload>1.5</version.apache.commons-fileupload>
 		<version.apache.commons-io>2.11.0</version.apache.commons-io>
 		<version.apache.commons-lang>3.12.0</version.apache.commons-lang>
 		<version.apache.commons-logging>1.2</version.apache.commons-logging>
